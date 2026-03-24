@@ -575,7 +575,6 @@ void BWT::testBWTAndRLE(const string& inputDir, const vector<string>& files) {
     }
 }
 
-// Новая функция: преобразование суффиксного массива в последний столбец матрицы BWT
 vector<uint8_t> BWT::suffixArrayToLastColumn(
     const vector<uint8_t>& input,
     const vector<int32_t>& suffixArray) {
@@ -589,24 +588,200 @@ vector<uint8_t> BWT::suffixArrayToLastColumn(
     size_t n = input.size();
     lastColumn.reserve(n);
 
-    // Для каждой циклической перестановки, заданной суффиксным массивом,
-    // берем последний символ (символ перед началом перестановки)
     for (size_t i = 0; i < n; i++) {
         int32_t startPos = suffixArray[i];
 
-        // Вычисляем позицию последнего символа в циклической перестановке
-        // Если startPos == 0, последний символ находится в конце строки (n-1)
-        // Иначе последний символ находится на позиции startPos - 1
-        int32_t lastPos;
-        if (startPos == 0) {
-            lastPos = static_cast<int32_t>(n - 1);
-        }
-        else {
-            lastPos = startPos - 1;
-        }
+        int32_t lastPos = (startPos == 0) ? static_cast<int32_t>(n - 1) : startPos - 1;
 
         lastColumn.push_back(input[lastPos]);
     }
 
     return lastColumn;
+}
+
+vector<int32_t> BWT::buildSuffixArrayDoubling(const vector<uint8_t>& input) {
+    size_t n = input.size();
+
+    if (n == 0) return vector<int32_t>();
+    if (n == 1) return vector<int32_t>{0};
+
+    vector<uint8_t> extended(2 * n);
+    for (size_t i = 0; i < n; i++) {
+        extended[i] = input[i];
+        extended[i + n] = input[i];
+    }
+
+    vector<int32_t> sa(2 * n);
+    vector<int32_t> rank(2 * n);
+    vector<int32_t> newRank(2 * n);
+
+    for (size_t i = 0; i < 2 * n; i++) {
+        sa[i] = static_cast<int32_t>(i);
+        rank[i] = extended[i];
+    }
+
+    sort(sa.begin(), sa.end(), [&extended](int32_t a, int32_t b) {
+        return extended[a] < extended[b];
+        });
+
+    int32_t r = 0;
+    rank[sa[0]] = r;
+    for (size_t i = 1; i < 2 * n; i++) {
+        if (extended[sa[i]] != extended[sa[i - 1]]) {
+            r++;
+        }
+        rank[sa[i]] = r;
+    }
+
+    for (int32_t k = 1; k < static_cast<int32_t>(2 * n); k *= 2) {
+        auto cmp = [&](int32_t a, int32_t b) -> bool {
+            if (rank[a] != rank[b]) return rank[a] < rank[b];
+            int32_t ra = (a + k < static_cast<int32_t>(2 * n)) ? rank[a + k] : -1;
+            int32_t rb = (b + k < static_cast<int32_t>(2 * n)) ? rank[b + k] : -1;
+            return ra < rb;
+            };
+
+        sort(sa.begin(), sa.end(), cmp);
+
+        newRank[sa[0]] = 0;
+        for (size_t i = 1; i < 2 * n; i++) {
+            newRank[sa[i]] = newRank[sa[i - 1]];
+            if (cmp(sa[i - 1], sa[i])) {
+                newRank[sa[i]]++;
+            }
+        }
+
+        for (size_t i = 0; i < 2 * n; i++) {
+            rank[i] = newRank[i];
+        }
+
+        if (rank[sa[2 * n - 1]] == static_cast<int32_t>(2 * n - 1)) {
+            break;
+        }
+    }
+
+    vector<int32_t> result;
+    for (size_t i = 0; i < 2 * n && result.size() < n; i++) {
+        if (sa[i] < static_cast<int32_t>(n)) {
+            result.push_back(sa[i]);
+        }
+    }
+
+    return result;
+}
+
+size_t BWT::findPrimaryIndex(const vector<int32_t>& suffixArray) {
+    for (size_t i = 0; i < suffixArray.size(); i++) {
+        if (suffixArray[i] == 0) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+BWTResult BWT::encodeEfficient(const vector<uint8_t>& input) {
+    BWTResult result;
+
+    if (input.empty()) {
+        result.description = "Empty input";
+        return result;
+    }
+
+    vector<int32_t> suffixArray = buildSuffixArrayDoubling(input);
+
+    result.transformed = suffixArrayToLastColumn(input, suffixArray);
+
+    result.primaryIndex = findPrimaryIndex(suffixArray);
+
+    result.description = "BWT encoding successful (efficient suffix array-based)";
+
+    return result;
+}
+
+BWTBlockResult BWT::encodeEfficientBlocked(const vector<uint8_t>& input, size_t blockSize) {
+    BWTBlockResult result;
+    result.blockSize = blockSize;
+    result.originalSize = input.size();
+
+    if (input.empty()) {
+        return result;
+    }
+
+    size_t numBlocks = (input.size() + blockSize - 1) / blockSize;
+    result.transformed.reserve(input.size());
+    result.primaryIndices.reserve(numBlocks);
+
+    for (size_t blockIdx = 0; blockIdx < numBlocks; blockIdx++) {
+        size_t start = blockIdx * blockSize;
+        size_t end = min(start + blockSize, input.size());
+
+        vector<uint8_t> block(input.begin() + start, input.begin() + end);
+
+        if (block.size() < blockSize) {
+            block.resize(blockSize, 0);
+        }
+
+        BWTResult bwtResult = encodeEfficient(block);
+
+        result.transformed.insert(result.transformed.end(),
+            bwtResult.transformed.begin(),
+            bwtResult.transformed.end());
+        result.primaryIndices.push_back(bwtResult.primaryIndex);
+    }
+
+    return result;
+}
+
+void BWT::testEfficientBWT(const string& inputDir, const vector<string>& files) {
+    size_t blockSize = 4096;
+
+    cout << "\n========================================\n";
+    cout << "Efficient BWT Test (Suffix Array Based)\n";
+    cout << "========================================\n\n";
+
+    for (const auto& filename : files) {
+        string filePath = inputDir + "\\" + filename;
+
+        if (!fileExistsBWT(filePath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        cout << "File: " << filename << "\n";
+        cout << "----------------------------------------\n";
+
+        ifstream inFile(filePath, ios::binary);
+        if (!inFile.is_open()) {
+            cout << "Error: Cannot open file\n\n";
+            continue;
+        }
+
+        vector<uint8_t> inputData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        cout << "Original size: " << inputData.size() << " bytes\n";
+        cout << "Block size: " << blockSize << " bytes\n";
+
+        auto start = chrono::high_resolution_clock::now();
+        BWTBlockResult efficientResult = encodeEfficientBlocked(inputData, blockSize);
+        auto end = chrono::high_resolution_clock::now();
+        auto efficientTime = chrono::duration_cast<chrono::milliseconds>(end - start);
+
+        cout << "Efficient BWT time: " << efficientTime.count() << " ms\n";
+        cout << "Transformed size: " << efficientResult.transformed.size() << " bytes\n";
+        cout << "Number of blocks: " << efficientResult.primaryIndices.size() << "\n";
+
+        cout << "Verifying by decoding... ";
+        vector<uint8_t> decoded = decodeBlocked(efficientResult);
+
+        if (decoded.size() == inputData.size() &&
+            memcmp(decoded.data(), inputData.data(), inputData.size()) == 0) {
+            cout << "PASSED\n";
+        }
+        else {
+            cout << "FAILED\n";
+        }
+
+        cout << "\n";
+    }
 }

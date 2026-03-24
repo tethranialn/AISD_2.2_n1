@@ -3,8 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman_canonical.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:huffman_canonical.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman_canonical.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:huffman_canonical.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:bwt.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:bwt.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -37,14 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lz77.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:lz77.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:bwt.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|solutionrelative:bwt.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{09D5C16B-4021-469B-9BA0-329195B194E9}|Code.vcxproj|C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -102,17 +110,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
-              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\main.cpp*",
-              "RelativeToolTip": "main.cpp*",
-              "ViewState": "AgIAAO8CAAAAAAAAAAAIwDYDAAABAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\main.cpp",
+              "RelativeToolTip": "main.cpp",
+              "ViewState": "AgIAAD0DAAAAAAAAAAAIwIQDAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-03-24T06:56:37.412Z",
               "IsPinned": true,
@@ -120,33 +128,57 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "lzw.cpp",
-              "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.cpp",
-              "RelativeDocumentMoniker": "lzw.cpp",
-              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.cpp*",
-              "RelativeToolTip": "lzw.cpp*",
-              "ViewState": "AgIAAFoBAAAAAAAAAAAIwKEBAAABAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "huffman_canonical.cpp",
+              "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman_canonical.cpp",
+              "RelativeDocumentMoniker": "huffman_canonical.cpp",
+              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman_canonical.cpp*",
+              "RelativeToolTip": "huffman_canonical.cpp*",
+              "ViewState": "AgIAAFIBAAAAAAAAAAAIwJkBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-03-24T18:19:44.54Z",
+              "WhenOpened": "2026-03-24T19:01:00.182Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "lzw.h",
-              "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.h",
-              "RelativeDocumentMoniker": "lzw.h",
-              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.h*",
-              "RelativeToolTip": "lzw.h*",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAIwEsAAAAGAAAAAAAAAA==",
+              "Title": "huffman_canonical.h",
+              "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman_canonical.h",
+              "RelativeDocumentMoniker": "huffman_canonical.h",
+              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman_canonical.h",
+              "RelativeToolTip": "huffman_canonical.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADEAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-03-24T18:19:25.238Z",
+              "WhenOpened": "2026-03-24T19:00:44.59Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
+              "Title": "lzw.cpp",
+              "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.cpp",
+              "RelativeDocumentMoniker": "lzw.cpp",
+              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.cpp",
+              "RelativeToolTip": "lzw.cpp",
+              "ViewState": "AgIAAFoBAAAAAAAAAAAIwKEBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-03-24T18:19:44.54Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "lzw.h",
+              "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.h",
+              "RelativeDocumentMoniker": "lzw.h",
+              "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzw.h",
+              "RelativeToolTip": "lzw.h",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAIwEsAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-03-24T18:19:25.238Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "lz78.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lz78.cpp",
               "RelativeDocumentMoniker": "lz78.cpp",
@@ -154,12 +186,11 @@
               "RelativeToolTip": "lz78.cpp",
               "ViewState": "AgIAADkBAAAAAAAAAAAIwIABAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-03-24T18:11:29.461Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T18:11:29.461Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 7,
               "Title": "lz78.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lz78.h",
               "RelativeDocumentMoniker": "lz78.h",
@@ -167,12 +198,11 @@
               "RelativeToolTip": "lz78.h",
               "ViewState": "AgIAABEAAAAAAAAAAAAswEsAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-03-24T18:11:10.53Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T18:11:10.53Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 9,
               "Title": "lzss.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzss.cpp",
               "RelativeDocumentMoniker": "lzss.cpp",
@@ -180,12 +210,11 @@
               "RelativeToolTip": "lzss.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-03-24T18:01:59.852Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T18:01:59.852Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "lzss.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lzss.h",
               "RelativeDocumentMoniker": "lzss.h",
@@ -193,12 +222,11 @@
               "RelativeToolTip": "lzss.h",
               "ViewState": "AgIAAAwAAAAAAAAAAAAIwFMAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-03-24T18:01:40.606Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T18:01:40.606Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 11,
               "Title": "lz77.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lz77.cpp",
               "RelativeDocumentMoniker": "lz77.cpp",
@@ -206,12 +234,11 @@
               "RelativeToolTip": "lz77.cpp",
               "ViewState": "AgIAACUBAAAAAAAAAAAIwGwBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-03-24T17:49:26.291Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T17:49:26.291Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 12,
               "Title": "lz77.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\lz77.h",
               "RelativeDocumentMoniker": "lz77.h",
@@ -219,38 +246,37 @@
               "RelativeToolTip": "lz77.h",
               "ViewState": "AgIAABwAAAAAAAAAAAAIwGMAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-03-24T17:49:03.355Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-24T17:49:03.355Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 4,
               "Title": "bwt.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.cpp",
               "RelativeDocumentMoniker": "bwt.cpp",
               "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.cpp",
               "RelativeToolTip": "bwt.cpp",
-              "ViewState": "AgIAABsCAAAAAAAAAAAIwGMCAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAMoCAAAAAAAAAAAIwBIDAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-03-24T16:40:08.828Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 3,
               "Title": "bwt.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.h",
               "RelativeDocumentMoniker": "bwt.h",
               "ToolTip": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bwt.h",
               "RelativeToolTip": "bwt.h",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAIwFYAAAAGAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAIwF8AAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-03-24T16:39:51.969Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 13,
               "Title": "huffman.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman.cpp",
               "RelativeDocumentMoniker": "huffman.cpp",
@@ -262,7 +288,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 14,
               "Title": "huffman.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\huffman.h",
               "RelativeDocumentMoniker": "huffman.h",
@@ -274,7 +300,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 15,
               "Title": "mtf.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\mtf.cpp",
               "RelativeDocumentMoniker": "mtf.cpp",
@@ -286,7 +312,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 16,
               "Title": "mtf.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\mtf.h",
               "RelativeDocumentMoniker": "mtf.h",
@@ -298,7 +324,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 17,
               "Title": "entropy.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\entropy.cpp",
               "RelativeDocumentMoniker": "entropy.cpp",
@@ -310,7 +336,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 18,
               "Title": "entropy.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\entropy.h",
               "RelativeDocumentMoniker": "entropy.h",
@@ -322,7 +348,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 19,
               "Title": "rle.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\rle.cpp",
               "RelativeDocumentMoniker": "rle.cpp",
@@ -334,7 +360,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "raw_convert.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\raw_convert.h",
               "RelativeDocumentMoniker": "raw_convert.h",
@@ -346,7 +372,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "raw_convert.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\raw_convert.cpp",
               "RelativeDocumentMoniker": "raw_convert.cpp",
@@ -358,7 +384,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "rle.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\rle.h",
               "RelativeDocumentMoniker": "rle.h",
@@ -370,7 +396,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 23,
               "Title": "bitstream.cpp",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bitstream.cpp",
               "RelativeDocumentMoniker": "bitstream.cpp",
@@ -382,7 +408,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 24,
               "Title": "bitstream.h",
               "DocumentMoniker": "C:\\Users\\chivo\\Documents\\AISD_2.2_n1\\Code\\bitstream.h",
               "RelativeDocumentMoniker": "bitstream.h",

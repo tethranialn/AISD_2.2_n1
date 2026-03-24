@@ -3,6 +3,7 @@
 #include "entropy.h"
 #include "mtf.h"
 #include "huffman.h"
+#include "huffman_canonical.h"
 #include "bwt.h"
 #include "lz77.h"
 #include "lzss.h"
@@ -18,8 +19,10 @@
 #include <limits>
 #include <sys/stat.h>
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
+using namespace chrono;
 
 namespace fs = std::filesystem;
 
@@ -36,16 +39,18 @@ void printMenu() {
     cout << "2. Entropy Calculation\n";
     cout << "3. MTF Transform Analysis\n";
     cout << "4. Huffman Compression Analysis\n";
-    cout << "5. BWT Transform Test (banana)\n";
-    cout << "6. BWT + RLE Combined Compression\n";
-    cout << "7. Suffix Array to BWT Last Column Demo\n";
-    cout << "8. LZ77 Compression Analysis\n";
-    cout << "9. LZSS Compression Analysis\n";
-    cout << "10. LZ78 Compression Analysis\n";
-    cout << "11. LZW Compression Analysis\n";
-    cout << "12. Exit\n";
+    cout << "5. Canonical Huffman Compression\n";
+    cout << "6. BWT Transform Test (banana)\n";
+    cout << "7. BWT + RLE Combined Compression\n";
+    cout << "8. Suffix Array to BWT Last Column Demo\n";
+    cout << "9. Efficient BWT (Suffix Array Based)\n";
+    cout << "10. LZ77 Compression Analysis\n";
+    cout << "11. LZSS Compression Analysis\n";
+    cout << "12. LZ78 Compression Analysis\n";
+    cout << "13. LZW Compression Analysis\n";
+    cout << "14. Exit\n";
     cout << "========================================\n";
-    cout << "Choose algorithm (1-12): ";
+    cout << "Choose algorithm (1-14): ";
 }
 
 void printFileSelectionMenu() {
@@ -396,49 +401,82 @@ void huffmanAnalysis(const string& inputDir, const string& encodedDir, const str
     }
 }
 
-vector<int32_t> buildSuffixArray(const vector<uint8_t>& data) {
-    size_t n = data.size();
-    vector<int32_t> suffixArray(n);
+void huffmanCanonicalAnalysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
+    cout << "\n========================================\n";
+    cout << "Canonical Huffman Compression\n";
+    cout << "========================================\n\n";
 
-    for (size_t i = 0; i < n; i++) {
-        suffixArray[i] = static_cast<int32_t>(i);
+    printFileSelectionMenu();
+    int fileChoice;
+    cin >> fileChoice;
+
+    if (fileChoice == 8) {
+        cout << "Operation cancelled\n";
+        return;
     }
 
-    sort(suffixArray.begin(), suffixArray.end(), [&data](int32_t a, int32_t b) {
-        size_t n = data.size();
-        for (size_t k = 0; k < n; k++) {
-            uint8_t ca = data[(a + k) % n];
-            uint8_t cb = data[(b + k) % n];
-            if (ca != cb) {
-                return ca < cb;
-            }
-        }
-        return a < b;
-        });
+    vector<string> files = getSelectedFiles(inputDir, fileChoice);
 
-    return suffixArray;
+    if (files.empty()) {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+
+        if (!fileExists(inputPath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        cout << "\nFile: " << filename << "\n";
+        cout << "----------------------------------------\n";
+
+        string errorMsg;
+
+        string encodedPath = encodedDir + "\\" + filename + ".huf_canonical";
+        string decodedPath = decodedDir + "\\" + filename;
+
+        ifstream inFile(inputPath, ios::binary);
+        vector<uint8_t> inputData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        cout << "Original size: " << inputData.size() << " bytes\n";
+
+        auto start = chrono::high_resolution_clock::now();
+        bool success = HuffmanCanonical::encodeFile(inputPath, encodedPath, errorMsg);
+        auto end = chrono::high_resolution_clock::now();
+        auto encodeTime = chrono::duration_cast<chrono::milliseconds>(end - start);
+
+        if (!success) {
+            cout << "Encoding failed: " << errorMsg << "\n\n";
+            continue;
+        }
+
+        ifstream encodedFile(encodedPath, ios::binary);
+        vector<uint8_t> encodedData((istreambuf_iterator<char>(encodedFile)), istreambuf_iterator<char>());
+        encodedFile.close();
+
+        cout << "Compressed size: " << encodedData.size() << " bytes\n";
+        cout << "Compression ratio: " << fixed << setprecision(2)
+            << (double)encodedData.size() / inputData.size() * 100.0 << "%\n";
+        cout << "Encoding time: " << encodeTime.count() << " ms\n";
+
+        start = chrono::high_resolution_clock::now();
+        bool verified = HuffmanCanonical::verifyCycle(inputPath, encodedPath, decodedPath, errorMsg);
+        end = chrono::high_resolution_clock::now();
+        auto decodeTime = chrono::duration_cast<chrono::milliseconds>(end - start);
+
+        cout << "Decoding time: " << decodeTime.count() << " ms\n";
+        cout << "Status: " << (verified ? "PASSED" : "FAILED") << "\n\n";
+    }
 }
 
 void suffixArrayToBWTDemo(const string& inputDir) {
     cout << "\n========================================\n";
     cout << "Suffix Array to BWT Last Column Demo\n";
     cout << "========================================\n\n";
-
-    string testStr = "banana";
-    vector<uint8_t> testData;
-    for (char c : testStr) {
-        testData.push_back(static_cast<uint8_t>(c));
-    }
-
-    vector<int32_t> suffixArray = buildSuffixArray(testData);
-    vector<uint8_t> lastColumn = BWT::suffixArrayToLastColumn(testData, suffixArray);
-
-    cout << "String: \"" << testStr << "\"\n";
-    cout << "Last column: ";
-    for (uint8_t b : lastColumn) {
-        cout << (char)b;
-    }
-    cout << "\n\n";
 
     printFileSelectionMenu();
     int choice;
@@ -478,28 +516,62 @@ void suffixArrayToBWTDemo(const string& inputDir) {
 
         cout << "Size: " << fileData.size() << " bytes\n";
 
-        vector<uint8_t> demoData;
-        size_t demoSize = min(fileData.size(), size_t(1000));
-        demoData.assign(fileData.begin(), fileData.begin() + demoSize);
+        size_t demoSize = min(fileData.size(), size_t(50));
+        vector<uint8_t> demoData(fileData.begin(), fileData.begin() + demoSize);
 
         if (demoSize < fileData.size()) {
             cout << "Using first " << demoSize << " bytes\n";
         }
 
-        vector<int32_t> suffixArray = buildSuffixArray(demoData);
+        cout << "\nInput data (first " << demoSize << " bytes):\n";
+        for (size_t i = 0; i < demoSize; i++) {
+            if (isprint(demoData[i])) {
+                cout << (char)demoData[i];
+            }
+            else {
+                cout << ".";
+            }
+        }
+        cout << "\n\n";
+
+        vector<int32_t> suffixArray = BWT::buildSuffixArrayDoubling(demoData);
+
+        cout << "Suffix array (indices of cyclic rotations in sorted order):\n";
+        for (size_t i = 0; i < suffixArray.size(); i++) {
+            cout << "  [" << setw(2) << i << "] = " << suffixArray[i];
+            cout << "  -> rotation: ";
+            for (size_t j = 0; j < min(demoSize, size_t(20)); j++) {
+                size_t pos = (suffixArray[i] + j) % demoSize;
+                if (isprint(demoData[pos])) {
+                    cout << (char)demoData[pos];
+                }
+                else {
+                    cout << ".";
+                }
+            }
+            if (demoSize > 20) cout << "...";
+            cout << "\n";
+        }
+
         vector<uint8_t> lastColumn = BWT::suffixArrayToLastColumn(demoData, suffixArray);
 
-        cout << "Last column size: " << lastColumn.size() << " bytes\n";
-
-        EntropyResult originalEntropy = EntropyCalculator::calculate(demoData, 1);
-        EntropyResult bwtEntropy = EntropyCalculator::calculate(lastColumn, 1);
-
-        cout << "Original entropy: " << fixed << setprecision(4)
-            << originalEntropy.entropy << " bits/byte\n";
-        cout << "BWT entropy: " << fixed << setprecision(4)
-            << bwtEntropy.entropy << " bits/byte\n";
-
+        cout << "\nBWT last column:\n";
+        for (size_t i = 0; i < lastColumn.size(); i++) {
+            if (isprint(lastColumn[i])) {
+                cout << (char)lastColumn[i];
+            }
+            else {
+                cout << "0x" << hex << setw(2) << setfill('0') << (int)lastColumn[i] << dec;
+            }
+        }
         cout << "\n";
+
+        cout << "\nLast column bytes:\n";
+        for (size_t i = 0; i < lastColumn.size(); i++) {
+            cout << "0x" << hex << setw(2) << setfill('0') << (int)lastColumn[i] << " ";
+            if ((i + 1) % 16 == 0) cout << "\n";
+        }
+        cout << dec << "\n\n";
     }
 }
 
@@ -773,9 +845,12 @@ int main() {
             huffmanAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
             break;
         case 5:
+            huffmanCanonicalAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
+            break;
+        case 6:
             BWT::testOnBanana();
             break;
-        case 6: {
+        case 7: {
             cout << "\n";
             cout << "========================================\n";
             cout << "BWT + RLE Combined Compression\n";
@@ -795,26 +870,29 @@ int main() {
             BWT::testBWTAndRLE(INPUT_DIR, files);
             break;
         }
-        case 7:
+        case 8:
             suffixArrayToBWTDemo(INPUT_DIR);
             break;
-        case 8:
-            lz77Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
         case 9:
-            lzssAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
+            BWT::testEfficientBWT(INPUT_DIR, getSelectedFiles(INPUT_DIR, 7));
             break;
         case 10:
-            lz78Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
+            lz77Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
             break;
         case 11:
-            lzwAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
+            lzssAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
             break;
         case 12:
+            lz78Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
+            break;
+        case 13:
+            lzwAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
+            break;
+        case 14:
             cout << "Exiting program...\n";
             return 0;
         default:
-            cout << "Invalid choice. Please select 1-12.\n";
+            cout << "Invalid choice. Please select 1-14.\n";
             break;
         }
     }
