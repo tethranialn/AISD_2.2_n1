@@ -131,6 +131,10 @@
     <ClInclude Include="bwt.h" />
     <ClInclude Include="entropy.h" />
     <ClInclude Include="huffman.h" />
+    <ClInclude Include="lz77.h" />
+    <ClInclude Include="lz78.h" />
+    <ClInclude Include="lzss.h" />
+    <ClInclude Include="lzw.h" />
     <ClInclude Include="mtf.h" />
     <ClInclude Include="raw_convert.h" />
     <ClInclude Include="rle.h" />
@@ -141,6 +145,10 @@
     <ClCompile Include="bwt.cpp" />
     <ClCompile Include="entropy.cpp" />
     <ClCompile Include="huffman.cpp" />
+    <ClCompile Include="lz77.cpp" />
+    <ClCompile Include="lz78.cpp" />
+    <ClCompile Include="lzss.cpp" />
+    <ClCompile Include="lzw.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mtf.cpp" />
     <ClCompile Include="raw_convert.cpp" />

@@ -60,6 +60,11 @@ public:
 
     static void testBWTAndRLE(const std::string& inputDir, const std::vector<std::string>& files);
 
+    // Новая функция: преобразование суффиксного массива в последний столбец матрицы BWT
+    static std::vector<uint8_t> suffixArrayToLastColumn(
+        const std::vector<uint8_t>& input,
+        const std::vector<int32_t>& suffixArray);
+
 private:
     static std::vector<std::vector<uint8_t>> buildRotationMatrix(const std::vector<uint8_t>& input);
 

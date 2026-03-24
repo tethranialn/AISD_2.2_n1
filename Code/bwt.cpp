@@ -574,3 +574,39 @@ void BWT::testBWTAndRLE(const string& inputDir, const vector<string>& files) {
         cout << "\n";
     }
 }
+
+// Новая функция: преобразование суффиксного массива в последний столбец матрицы BWT
+vector<uint8_t> BWT::suffixArrayToLastColumn(
+    const vector<uint8_t>& input,
+    const vector<int32_t>& suffixArray) {
+
+    vector<uint8_t> lastColumn;
+
+    if (input.empty() || suffixArray.empty()) {
+        return lastColumn;
+    }
+
+    size_t n = input.size();
+    lastColumn.reserve(n);
+
+    // Для каждой циклической перестановки, заданной суффиксным массивом,
+    // берем последний символ (символ перед началом перестановки)
+    for (size_t i = 0; i < n; i++) {
+        int32_t startPos = suffixArray[i];
+
+        // Вычисляем позицию последнего символа в циклической перестановке
+        // Если startPos == 0, последний символ находится в конце строки (n-1)
+        // Иначе последний символ находится на позиции startPos - 1
+        int32_t lastPos;
+        if (startPos == 0) {
+            lastPos = static_cast<int32_t>(n - 1);
+        }
+        else {
+            lastPos = startPos - 1;
+        }
+
+        lastColumn.push_back(input[lastPos]);
+    }
+
+    return lastColumn;
+}

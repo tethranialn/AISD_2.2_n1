@@ -2,6 +2,10 @@ C:\Users\chivo\Documents\AISD_2.2_n1\Code\bitstream.cpp;C:\Users\chivo\Documents
 C:\Users\chivo\Documents\AISD_2.2_n1\Code\bwt.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\bwt.obj
 C:\Users\chivo\Documents\AISD_2.2_n1\Code\entropy.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\entropy.obj
 C:\Users\chivo\Documents\AISD_2.2_n1\Code\huffman.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\huffman.obj
+C:\Users\chivo\Documents\AISD_2.2_n1\Code\lz77.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\lz77.obj
+C:\Users\chivo\Documents\AISD_2.2_n1\Code\lz78.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\lz78.obj
+C:\Users\chivo\Documents\AISD_2.2_n1\Code\lzss.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\lzss.obj
+C:\Users\chivo\Documents\AISD_2.2_n1\Code\lzw.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\lzw.obj
 C:\Users\chivo\Documents\AISD_2.2_n1\Code\main.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\main.obj
 C:\Users\chivo\Documents\AISD_2.2_n1\Code\mtf.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\mtf.obj
 C:\Users\chivo\Documents\AISD_2.2_n1\Code\raw_convert.cpp;C:\Users\chivo\Documents\AISD_2.2_n1\Code\Code\x64\Debug\raw_convert.obj
