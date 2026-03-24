@@ -1,0 +1,3 @@
+﻿  main.cpp
+C:\Users\tetramania\Documents\.Study\AISD\Lab\N1\Code\N1\N1\main.cpp(4,6): warning C4326: возвращаемый тип "main" должен быть "int", а не "void"
+  N1.vcxproj -> C:\Users\tetramania\Documents\.Study\AISD\Lab\N1\Code\N1\x64\Debug\N1.exe
