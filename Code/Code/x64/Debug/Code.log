@@ -1,2 +1,5 @@
-﻿  huffman_canonical.cpp
+﻿  analysis.cpp
+  compressors.cpp
+  main.cpp
+  Создание кода...
   Code.vcxproj -> C:\Users\chivo\Documents\AISD_2.2_n1\Code\x64\Debug\Code.exe

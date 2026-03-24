@@ -1,39 +1,163 @@
 #include "raw_convert.h"
-#include "rle.h"
-#include "entropy.h"
-#include "mtf.h"
-#include "huffman.h"
-#include "huffman_canonical.h"
-#include "bwt.h"
-#include "lz77.h"
-#include "lzss.h"
-#include "lz78.h"
-#include "lzw.h"
+#include "compressors.h"
+#include "analysis.h"
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <filesystem>
-#include <iomanip>
-#include <vector>
-#include <cstring>
 #include <limits>
-#include <sys/stat.h>
-#include <algorithm>
-#include <chrono>
+#include <functional>
+#include <vector>
 
 using namespace std;
-using namespace chrono;
 
 namespace fs = std::filesystem;
 
-bool fileExists(const string& path) {
-    struct stat buffer;
-    return (stat(path.c_str(), &buffer) == 0);
-}
-
-void printMenu() {
+void printMainMenu() {
     cout << "\n========================================\n";
     cout << "Compression & Analysis Tool\n";
+    cout << "========================================\n";
+    cout << "1. Debug Mode (Algorithm Analysis)\n";
+    cout << "2. Compressors Mode (Test All Compressors)\n";
+    cout << "3. Exit\n";
+    cout << "========================================\n";
+    cout << "Choose mode (1-3): ";
+}
+
+void printCompressorsMenu() {
+    cout << "\n========================================\n";
+    cout << "Compressors Mode\n";
+    cout << "========================================\n";
+    cout << "1. Test all compressors on all files\n";
+    cout << "2. Test specific compressor\n";
+    cout << "3. Back to main menu\n";
+    cout << "========================================\n";
+    cout << "Choose option (1-3): ";
+}
+
+void printCompressorList() {
+    cout << "\nAvailable compressors:\n";
+    cout << "1. HA (Canonical Huffman)\n";
+    cout << "2. RLE (Run-Length Encoding)\n";
+    cout << "3. BWT + RLE\n";
+    cout << "4. BWT + MTF + HA\n";
+    cout << "5. BWT + MTF + RLE + HA\n";
+    cout << "6. LZSS\n";
+    cout << "7. LZSS + HA\n";
+    cout << "8. LZW\n";
+    cout << "9. LZW + HA\n";
+    cout << "Enter choice (1-9): ";
+}
+
+void runCompressorsOnAllFiles(const string& inputDir, const string& outputDir) {
+    vector<string> files = { "BW.raw", "Gray.raw", "RGB.raw", "enwik7.txt", "RusText.txt", "BIN.bin" };
+    vector<CompressionResult> allResults;
+
+    vector<pair<string, function<CompressionResult(const string&, const string&)>>> compressors;
+    compressors.push_back({ "HA", Compressors::HA });
+    compressors.push_back({ "RLE", Compressors::RLE });
+    compressors.push_back({ "BWT+RLE", Compressors::BWTRLE });
+    compressors.push_back({ "BWT+MTF+HA", Compressors::BWTMTFHA });
+    compressors.push_back({ "BWT+MTF+RLE+HA", Compressors::BWTMTFRLEHA });
+    compressors.push_back({ "LZSS", Compressors::LZSS });
+    compressors.push_back({ "LZSS+HA", Compressors::LZSSHA });
+    compressors.push_back({ "LZW", Compressors::LZW });
+    compressors.push_back({ "LZW+HA", Compressors::LZWHA });
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+        if (!fs::exists(inputPath)) {
+            cout << "File not found: " << filename << " - skipping\n";
+            continue;
+        }
+
+        cout << "\n========================================\n";
+        cout << "Testing on: " << filename << "\n";
+        cout << "========================================\n";
+
+        string basePath = outputDir + "\\" + filename;
+
+        for (size_t i = 0; i < compressors.size(); i++) {
+            cout << "\n" << compressors[i].first << ":\n";
+            cout << "----------------------------------------\n";
+            CompressionResult result = compressors[i].second(inputPath, basePath + "_" + compressors[i].first);
+            allResults.push_back(result);
+            Compressors::printResult(result);
+        }
+    }
+
+    Compressors::printSummary(allResults);
+}
+
+void runSpecificCompressor(const string& inputDir, const string& outputDir) {
+    printCompressorList();
+    int compChoice;
+    cin >> compChoice;
+
+    if (compChoice < 1 || compChoice > 9) {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    Analysis::printFileSelectionMenu();
+    int fileChoice;
+    cin >> fileChoice;
+
+    if (fileChoice == 8) {
+        cout << "Operation cancelled\n";
+        return;
+    }
+
+    vector<string> allFiles = { "BW.raw", "Gray.raw", "RGB.raw", "enwik7.txt", "RusText.txt", "BIN.bin" };
+    vector<string> files;
+
+    if (fileChoice == 7) {
+        files = allFiles;
+    }
+    else if (fileChoice >= 1 && fileChoice <= 6) {
+        files.push_back(allFiles[fileChoice - 1]);
+    }
+    else {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    vector<pair<string, function<CompressionResult(const string&, const string&)>>> compressors;
+    compressors.push_back({ "HA", Compressors::HA });
+    compressors.push_back({ "RLE", Compressors::RLE });
+    compressors.push_back({ "BWT+RLE", Compressors::BWTRLE });
+    compressors.push_back({ "BWT+MTF+HA", Compressors::BWTMTFHA });
+    compressors.push_back({ "BWT+MTF+RLE+HA", Compressors::BWTMTFRLEHA });
+    compressors.push_back({ "LZSS", Compressors::LZSS });
+    compressors.push_back({ "LZSS+HA", Compressors::LZSSHA });
+    compressors.push_back({ "LZW", Compressors::LZW });
+    compressors.push_back({ "LZW+HA", Compressors::LZWHA });
+
+    auto comp = compressors[compChoice - 1];
+    vector<CompressionResult> results;
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+        if (!fs::exists(inputPath)) {
+            cout << "File not found: " << filename << " - skipping\n";
+            continue;
+        }
+
+        cout << "\n========================================\n";
+        cout << comp.first << " on " << filename << "\n";
+        cout << "========================================\n";
+
+        string basePath = outputDir + "\\" + filename + "_" + comp.first;
+        CompressionResult result = comp.second(inputPath, basePath);
+        results.push_back(result);
+        Compressors::printResult(result);
+    }
+
+    Compressors::printSummary(results);
+}
+
+void printDebugMenu() {
+    cout << "\n========================================\n";
+    cout << "Debug Mode - Algorithm Analysis\n";
     cout << "========================================\n";
     cout << "1. RLE Compression Analysis\n";
     cout << "2. Entropy Calculation\n";
@@ -48,757 +172,10 @@ void printMenu() {
     cout << "11. LZSS Compression Analysis\n";
     cout << "12. LZ78 Compression Analysis\n";
     cout << "13. LZW Compression Analysis\n";
-    cout << "14. Exit\n";
+    cout << "14. Run ALL Analyses on ALL Files\n";
+    cout << "15. Back to main menu\n";
     cout << "========================================\n";
-    cout << "Choose algorithm (1-14): ";
-}
-
-void printFileSelectionMenu() {
-    cout << "\n----------------------------------------\n";
-    cout << "Select files to process:\n";
-    cout << "1. BW.raw (Black & White image)\n";
-    cout << "2. Gray.raw (Grayscale image)\n";
-    cout << "3. RGB.raw (Color RGB image)\n";
-    cout << "4. enwik7.txt (English text)\n";
-    cout << "5. RusText.txt (Russian text)\n";
-    cout << "6. BIN.bin (Binary data)\n";
-    cout << "7. All files\n";
-    cout << "8. Cancel\n";
-    cout << "Enter your choice (1-8): ";
-}
-
-vector<string> getSelectedFiles(const string& inputDir, int choice) {
-    vector<string> allFiles = { "BW.raw", "Gray.raw", "RGB.raw", "enwik7.txt", "RusText.txt", "BIN.bin" };
-    vector<string> selectedFiles;
-
-    if (choice == 7) {
-        return allFiles;
-    }
-
-    if (choice >= 1 && choice <= 6) {
-        selectedFiles.push_back(allFiles[choice - 1]);
-    }
-
-    return selectedFiles;
-}
-
-void rleAnalysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "RLE Compression Analysis\n";
-    cout << "========================================\n\n";
-
-    printFileSelectionMenu();
-    int choice;
-    cin >> choice;
-
-    if (choice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, choice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    struct TestConfig {
-        string filename;
-        uint8_t Ms;
-        uint8_t Mc;
-        string description;
-        bool isRaw;
-    };
-
-    vector<TestConfig> allTests = {
-        {"BW.raw", 1, 1, "Black & White", true},
-        {"BW.raw", 1, 2, "Black & White", true},
-        {"Gray.raw", 1, 1, "Grayscale", true},
-        {"Gray.raw", 1, 2, "Grayscale", true},
-        {"RGB.raw", 3, 1, "Color RGB", true},
-        {"RGB.raw", 3, 2, "Color RGB", true},
-        {"enwik7.txt", 1, 1, "Text (English)", false},
-        {"RusText.txt", 1, 1, "Text (Russian)", false},
-        {"BIN.bin", 1, 1, "Binary", false}
-    };
-
-    for (const auto& filename : files) {
-        for (const auto& test : allTests) {
-            if (test.filename != filename) continue;
-
-            string inputPath = inputDir + "\\" + test.filename;
-
-            if (!fileExists(inputPath)) {
-                cout << "File not found: " << test.filename << " - skipping\n\n";
-                continue;
-            }
-
-            cout << "File: " << test.filename << " (" << test.description << ")\n";
-            cout << "Parameters: Ms=" << (int)test.Ms << ", Mc=" << (int)test.Mc << "\n";
-            cout << "----------------------------------------\n";
-
-            string encodedPath = encodedDir + "\\" + test.filename + ".rle";
-            string decodedPath = decodedDir + "\\" + test.filename;
-
-            string errorMsg;
-
-            if (test.isRaw) {
-                uint8_t type = 0;
-                uint32_t pixels = 0;
-                vector<uint8_t> pixelData;
-
-                ifstream rawFile(inputPath, ios::binary);
-                if (rawFile.is_open()) {
-                    rawFile.read((char*)&type, 1);
-                    rawFile.read((char*)&pixels, 4);
-                    pixelData.assign((istreambuf_iterator<char>(rawFile)), istreambuf_iterator<char>());
-                    rawFile.close();
-                }
-
-                vector<uint8_t> encodedPixelData = RLE::encode(pixelData, test.Ms, test.Mc);
-
-                RLEHeader header;
-                header.Ms = test.Ms;
-                header.Mc = test.Mc;
-                header.originalSize = pixelData.size();
-                header.encodedSize = encodedPixelData.size();
-
-                size_t encodedTotalSize = sizeof(header) + encodedPixelData.size();
-
-                ofstream outFile(encodedPath, ios::binary);
-                if (outFile.is_open()) {
-                    outFile.write(reinterpret_cast<const char*>(&header.Ms), sizeof(header.Ms));
-                    outFile.write(reinterpret_cast<const char*>(&header.Mc), sizeof(header.Mc));
-                    outFile.write(reinterpret_cast<const char*>(&header.originalSize), sizeof(header.originalSize));
-                    outFile.write(reinterpret_cast<const char*>(&header.encodedSize), sizeof(header.encodedSize));
-                    outFile.write(reinterpret_cast<const char*>(encodedPixelData.data()), encodedPixelData.size());
-                    outFile.close();
-                }
-
-                vector<uint8_t> decodedPixelData = RLE::decode(encodedPixelData, test.Ms, test.Mc);
-
-                ofstream decFile(decodedPath, ios::binary);
-                if (decFile.is_open()) {
-                    decFile.put(type);
-                    decFile.write((char*)&pixels, 4);
-                    decFile.write((char*)decodedPixelData.data(), decodedPixelData.size());
-                    decFile.close();
-                }
-
-                if (pixelData.size() == decodedPixelData.size() &&
-                    memcmp(pixelData.data(), decodedPixelData.data(), pixelData.size()) == 0) {
-                    double ratio = (double)encodedTotalSize / pixelData.size() * 100.0;
-                    double factor = (double)pixelData.size() / encodedTotalSize;
-                    cout << "  Pixel data: " << pixelData.size() << " bytes\n";
-                    cout << "  Encoded:    " << encodedTotalSize << " bytes\n";
-                    cout << "  Ratio:      " << fixed << setprecision(2) << ratio << "% of pixel data\n";
-                    cout << "  Factor:     " << fixed << setprecision(2) << factor << ":1\n";
-                    cout << "  Status:     PASSED\n\n";
-                }
-                else {
-                    cout << "  Status:     FAILED\n\n";
-                }
-            }
-            else {
-                CompressionStats actual = RLE::compressFile(inputPath, encodedPath, test.Ms, test.Mc, errorMsg);
-                if (!errorMsg.empty()) {
-                    cout << "Error: " << errorMsg << "\n\n";
-                    continue;
-                }
-
-                bool verified = RLE::verifyCycle(inputPath, encodedPath, decodedPath, test.Ms, test.Mc, errorMsg);
-
-                cout << "  Original: " << actual.originalSize << " bytes\n";
-                cout << "  Encoded:  " << actual.encodedSize << " bytes\n";
-                cout << "  Ratio:    " << fixed << setprecision(2) << actual.compressionRatio << "% of original\n";
-                cout << "  Factor:   " << fixed << setprecision(2) << actual.compressionFactor << ":1\n";
-                cout << "  Status:   " << (verified ? "PASSED" : "FAILED") << "\n\n";
-            }
-        }
-    }
-}
-
-void entropyAnalysis(const string& inputDir) {
-    cout << "\n========================================\n";
-    cout << "Entropy Calculation\n";
-    cout << "========================================\n\n";
-
-    printFileSelectionMenu();
-    int choice;
-    cin >> choice;
-
-    if (choice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, choice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string filePath = inputDir + "\\" + filename;
-
-        if (!fileExists(filePath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "File: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        ifstream file(filePath, ios::binary);
-        if (!file.is_open()) {
-            cout << "Error: Cannot open file\n\n";
-            continue;
-        }
-
-        vector<uint8_t> data((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
-        file.close();
-
-        if (data.empty()) {
-            cout << "File is empty\n\n";
-            continue;
-        }
-
-        cout << "File size: " << data.size() << " bytes\n\n";
-        cout << "Entropy depending on symbol code length (Ms):\n";
-        cout << "Ms (bytes) | Entropy H(X) (bits/symbol)\n";
-        cout << "----------------------------------------\n";
-
-        for (uint8_t Ms = 1; Ms <= 4; Ms++) {
-            EntropyResult result = EntropyCalculator::calculate(data, Ms);
-
-            cout << "   " << setw(2) << (int)Ms << "        |   "
-                << fixed << setprecision(4) << result.entropy << "\n";
-        }
-
-        cout << "\n";
-    }
-}
-
-void mtfAnalysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "MTF Transform Analysis\n";
-    cout << "========================================\n\n";
-
-    printFileSelectionMenu();
-    int choice;
-    cin >> choice;
-
-    if (choice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, choice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string inputPath = inputDir + "\\" + filename;
-
-        if (!fileExists(inputPath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "File: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        ifstream inFile(inputPath, ios::binary);
-        if (!inFile.is_open()) {
-            cout << "Error: Cannot open file\n\n";
-            continue;
-        }
-
-        vector<uint8_t> originalData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
-        inFile.close();
-
-        cout << "Original size: " << originalData.size() << " bytes\n";
-
-        vector<uint8_t> encodedData = MTF::encode(originalData);
-        cout << "MTF encoded size: " << encodedData.size() << " bytes\n";
-
-        vector<uint8_t> decodedData = MTF::decode(encodedData);
-
-        if (originalData.size() == decodedData.size() &&
-            memcmp(originalData.data(), decodedData.data(), originalData.size()) == 0) {
-            cout << "Verification: PASSED\n";
-        }
-        else {
-            cout << "Verification: FAILED\n";
-        }
-
-        cout << "\n";
-    }
-}
-
-void huffmanAnalysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "Huffman Compression Analysis\n";
-    cout << "========================================\n\n";
-
-    printFileSelectionMenu();
-    int choice;
-    cin >> choice;
-
-    if (choice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, choice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string inputPath = inputDir + "\\" + filename;
-
-        if (!fileExists(inputPath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        string errorMsg;
-        CompressionStatsHuffman stats = Huffman::analyzeFile(inputPath, errorMsg);
-
-        if (!errorMsg.empty()) {
-            cout << "Error analyzing " << filename << ": " << errorMsg << "\n\n";
-            continue;
-        }
-
-        Huffman::printStats(stats);
-
-        string encodedPath = encodedDir + "\\" + filename + ".huf";
-        string decodedPath = decodedDir + "\\" + filename;
-
-        if (Huffman::encodeFileWithStats(inputPath, encodedPath, stats, errorMsg)) {
-            cout << "Encoding successful\n";
-
-            if (Huffman::decodeFileWithVerify(encodedPath, decodedPath, errorMsg)) {
-                cout << "Decoding and verification: PASSED\n";
-            }
-            else {
-                cout << "Decoding verification: FAILED - " << errorMsg << "\n";
-            }
-        }
-        else {
-            cout << "Encoding failed: " << errorMsg << "\n";
-        }
-
-        cout << "\n";
-    }
-}
-
-void huffmanCanonicalAnalysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "Canonical Huffman Compression\n";
-    cout << "========================================\n\n";
-
-    printFileSelectionMenu();
-    int fileChoice;
-    cin >> fileChoice;
-
-    if (fileChoice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, fileChoice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string inputPath = inputDir + "\\" + filename;
-
-        if (!fileExists(inputPath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "\nFile: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        string errorMsg;
-
-        string encodedPath = encodedDir + "\\" + filename + ".huf_canonical";
-        string decodedPath = decodedDir + "\\" + filename;
-
-        ifstream inFile(inputPath, ios::binary);
-        vector<uint8_t> inputData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
-        inFile.close();
-
-        cout << "Original size: " << inputData.size() << " bytes\n";
-
-        auto start = chrono::high_resolution_clock::now();
-        bool success = HuffmanCanonical::encodeFile(inputPath, encodedPath, errorMsg);
-        auto end = chrono::high_resolution_clock::now();
-        auto encodeTime = chrono::duration_cast<chrono::milliseconds>(end - start);
-
-        if (!success) {
-            cout << "Encoding failed: " << errorMsg << "\n\n";
-            continue;
-        }
-
-        ifstream encodedFile(encodedPath, ios::binary);
-        vector<uint8_t> encodedData((istreambuf_iterator<char>(encodedFile)), istreambuf_iterator<char>());
-        encodedFile.close();
-
-        cout << "Compressed size: " << encodedData.size() << " bytes\n";
-        cout << "Compression ratio: " << fixed << setprecision(2)
-            << (double)encodedData.size() / inputData.size() * 100.0 << "%\n";
-        cout << "Encoding time: " << encodeTime.count() << " ms\n";
-
-        start = chrono::high_resolution_clock::now();
-        bool verified = HuffmanCanonical::verifyCycle(inputPath, encodedPath, decodedPath, errorMsg);
-        end = chrono::high_resolution_clock::now();
-        auto decodeTime = chrono::duration_cast<chrono::milliseconds>(end - start);
-
-        cout << "Decoding time: " << decodeTime.count() << " ms\n";
-        cout << "Status: " << (verified ? "PASSED" : "FAILED") << "\n\n";
-    }
-}
-
-void suffixArrayToBWTDemo(const string& inputDir) {
-    cout << "\n========================================\n";
-    cout << "Suffix Array to BWT Last Column Demo\n";
-    cout << "========================================\n\n";
-
-    printFileSelectionMenu();
-    int choice;
-    cin >> choice;
-
-    if (choice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, choice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string filePath = inputDir + "\\" + filename;
-
-        if (!fileExists(filePath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "\nFile: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        ifstream inFile(filePath, ios::binary);
-        if (!inFile.is_open()) {
-            cout << "Error: Cannot open file\n\n";
-            continue;
-        }
-
-        vector<uint8_t> fileData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
-        inFile.close();
-
-        cout << "Size: " << fileData.size() << " bytes\n";
-
-        size_t demoSize = min(fileData.size(), size_t(50));
-        vector<uint8_t> demoData(fileData.begin(), fileData.begin() + demoSize);
-
-        if (demoSize < fileData.size()) {
-            cout << "Using first " << demoSize << " bytes\n";
-        }
-
-        cout << "\nInput data (first " << demoSize << " bytes):\n";
-        for (size_t i = 0; i < demoSize; i++) {
-            if (isprint(demoData[i])) {
-                cout << (char)demoData[i];
-            }
-            else {
-                cout << ".";
-            }
-        }
-        cout << "\n\n";
-
-        vector<int32_t> suffixArray = BWT::buildSuffixArrayDoubling(demoData);
-
-        cout << "Suffix array (indices of cyclic rotations in sorted order):\n";
-        for (size_t i = 0; i < suffixArray.size(); i++) {
-            cout << "  [" << setw(2) << i << "] = " << suffixArray[i];
-            cout << "  -> rotation: ";
-            for (size_t j = 0; j < min(demoSize, size_t(20)); j++) {
-                size_t pos = (suffixArray[i] + j) % demoSize;
-                if (isprint(demoData[pos])) {
-                    cout << (char)demoData[pos];
-                }
-                else {
-                    cout << ".";
-                }
-            }
-            if (demoSize > 20) cout << "...";
-            cout << "\n";
-        }
-
-        vector<uint8_t> lastColumn = BWT::suffixArrayToLastColumn(demoData, suffixArray);
-
-        cout << "\nBWT last column:\n";
-        for (size_t i = 0; i < lastColumn.size(); i++) {
-            if (isprint(lastColumn[i])) {
-                cout << (char)lastColumn[i];
-            }
-            else {
-                cout << "0x" << hex << setw(2) << setfill('0') << (int)lastColumn[i] << dec;
-            }
-        }
-        cout << "\n";
-
-        cout << "\nLast column bytes:\n";
-        for (size_t i = 0; i < lastColumn.size(); i++) {
-            cout << "0x" << hex << setw(2) << setfill('0') << (int)lastColumn[i] << " ";
-            if ((i + 1) % 16 == 0) cout << "\n";
-        }
-        cout << dec << "\n\n";
-    }
-}
-
-void lz77Analysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "LZ77 Compression Analysis\n";
-    cout << "========================================\n\n";
-
-    uint32_t windowSize = 4096;
-    uint32_t lookaheadSize = 16;
-
-    printFileSelectionMenu();
-    int fileChoice;
-    cin >> fileChoice;
-
-    if (fileChoice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, fileChoice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string inputPath = inputDir + "\\" + filename;
-
-        if (!fileExists(inputPath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "\nFile: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        string errorMsg;
-
-        string encodedPath = encodedDir + "\\" + filename + ".lz77";
-        string decodedPath = decodedDir + "\\" + filename;
-
-        LZ77Stats stats = LZ77::compressFile(inputPath, encodedPath,
-            windowSize, lookaheadSize, errorMsg);
-
-        if (!errorMsg.empty()) {
-            cout << "Error: " << errorMsg << "\n\n";
-            continue;
-        }
-
-        LZ77::printStats(stats);
-
-        bool verified = LZ77::verifyCycle(inputPath, encodedPath, decodedPath,
-            windowSize, lookaheadSize, errorMsg);
-
-        cout << "  Status: " << (verified ? "PASSED" : "FAILED") << "\n\n";
-    }
-}
-
-void lzssAnalysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "LZSS Compression Analysis\n";
-    cout << "========================================\n\n";
-
-    uint32_t windowSize = 4096;
-    uint32_t lookaheadSize = 16;
-
-    printFileSelectionMenu();
-    int fileChoice;
-    cin >> fileChoice;
-
-    if (fileChoice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, fileChoice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string inputPath = inputDir + "\\" + filename;
-
-        if (!fileExists(inputPath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "\nFile: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        string errorMsg;
-
-        string encodedPath = encodedDir + "\\" + filename + ".lzss";
-        string decodedPath = decodedDir + "\\" + filename;
-
-        LZSSStats stats = LZSS::compressFile(inputPath, encodedPath,
-            windowSize, lookaheadSize, errorMsg);
-
-        if (!errorMsg.empty()) {
-            cout << "Error: " << errorMsg << "\n\n";
-            continue;
-        }
-
-        LZSS::printStats(stats);
-
-        bool verified = LZSS::verifyCycle(inputPath, encodedPath, decodedPath,
-            windowSize, lookaheadSize, errorMsg);
-
-        cout << "  Status: " << (verified ? "PASSED" : "FAILED") << "\n\n";
-    }
-}
-
-void lz78Analysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "LZ78 Compression Analysis\n";
-    cout << "========================================\n\n";
-
-    uint32_t maxDictSize = 4096;
-
-    printFileSelectionMenu();
-    int fileChoice;
-    cin >> fileChoice;
-
-    if (fileChoice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, fileChoice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string inputPath = inputDir + "\\" + filename;
-
-        if (!fileExists(inputPath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "\nFile: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        string errorMsg;
-
-        string encodedPath = encodedDir + "\\" + filename + ".lz78";
-        string decodedPath = decodedDir + "\\" + filename;
-
-        LZ78Stats stats = LZ78::compressFile(inputPath, encodedPath,
-            maxDictSize, errorMsg);
-
-        if (!errorMsg.empty()) {
-            cout << "Error: " << errorMsg << "\n\n";
-            continue;
-        }
-
-        LZ78::printStats(stats);
-
-        bool verified = LZ78::verifyCycle(inputPath, encodedPath, decodedPath,
-            maxDictSize, errorMsg);
-
-        cout << "  Status: " << (verified ? "PASSED" : "FAILED") << "\n\n";
-    }
-}
-
-void lzwAnalysis(const string& inputDir, const string& encodedDir, const string& decodedDir) {
-    cout << "\n========================================\n";
-    cout << "LZW Compression Analysis\n";
-    cout << "========================================\n\n";
-
-    uint32_t maxDictSize = 4096;
-
-    printFileSelectionMenu();
-    int fileChoice;
-    cin >> fileChoice;
-
-    if (fileChoice == 8) {
-        cout << "Operation cancelled\n";
-        return;
-    }
-
-    vector<string> files = getSelectedFiles(inputDir, fileChoice);
-
-    if (files.empty()) {
-        cout << "Invalid choice\n";
-        return;
-    }
-
-    for (const auto& filename : files) {
-        string inputPath = inputDir + "\\" + filename;
-
-        if (!fileExists(inputPath)) {
-            cout << "File not found: " << filename << " - skipping\n\n";
-            continue;
-        }
-
-        cout << "\nFile: " << filename << "\n";
-        cout << "----------------------------------------\n";
-
-        string errorMsg;
-
-        string encodedPath = encodedDir + "\\" + filename + ".lzw";
-        string decodedPath = decodedDir + "\\" + filename;
-
-        LZWStats stats = LZW::compressFile(inputPath, encodedPath,
-            maxDictSize, errorMsg);
-
-        if (!errorMsg.empty()) {
-            cout << "Error: " << errorMsg << "\n\n";
-            continue;
-        }
-
-        LZW::printStats(stats);
-
-        bool verified = LZW::verifyCycle(inputPath, encodedPath, decodedPath,
-            maxDictSize, errorMsg);
-
-        cout << "  Status: " << (verified ? "PASSED" : "FAILED") << "\n\n";
-    }
+    cout << "Choose algorithm (1-15): ";
 }
 
 int main() {
@@ -806,10 +183,12 @@ int main() {
     const string INPUT_DIR = BASE_PATH + "\\Input files";
     const string ENCODED_DIR = BASE_PATH + "\\Encoded files";
     const string DECODED_DIR = BASE_PATH + "\\Decoded files";
+    const string COMPRESSOR_DIR = BASE_PATH + "\\Compressor results";
 
     fs::create_directories(INPUT_DIR);
     fs::create_directories(ENCODED_DIR);
     fs::create_directories(DECODED_DIR);
+    fs::create_directories(COMPRESSOR_DIR);
 
     cout << "Converting images to RAW format...\n";
     cout << "----------------------------------------\n";
@@ -818,11 +197,21 @@ int main() {
         return 1;
     }
     cout << "Images converted successfully!\n";
+    cout << "\n========================================\n";
+    cout << "File Storage Locations:\n";
+    cout << "========================================\n";
+    cout << "Input files:     " << INPUT_DIR << "\n";
+    cout << "Encoded files:   " << ENCODED_DIR << "\n";
+    cout << "Decoded files:   " << DECODED_DIR << "\n";
+    cout << "Compressor results: " << COMPRESSOR_DIR << "\n";
+    cout << "========================================\n";
+    cout << "Note: All encoded and decoded files are saved permanently\n";
+    cout << "      in the respective directories for later analysis.\n\n";
 
-    int choice = 0;
     while (true) {
-        printMenu();
-        cin >> choice;
+        printMainMenu();
+        int mode;
+        cin >> mode;
 
         if (cin.fail()) {
             cin.clear();
@@ -831,69 +220,63 @@ int main() {
             continue;
         }
 
-        switch (choice) {
-        case 1:
-            rleAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 2:
-            entropyAnalysis(INPUT_DIR);
-            break;
-        case 3:
-            mtfAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 4:
-            huffmanAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 5:
-            huffmanCanonicalAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 6:
-            BWT::testOnBanana();
-            break;
-        case 7: {
-            cout << "\n";
-            cout << "========================================\n";
-            cout << "BWT + RLE Combined Compression\n";
-            cout << "========================================\n\n";
-            printFileSelectionMenu();
-            int fileChoice;
-            cin >> fileChoice;
-            if (fileChoice == 8) {
-                cout << "Operation cancelled\n";
-                break;
-            }
-            vector<string> files = getSelectedFiles(INPUT_DIR, fileChoice);
-            if (files.empty()) {
-                cout << "Invalid choice\n";
-                break;
-            }
-            BWT::testBWTAndRLE(INPUT_DIR, files);
+        if (mode == 3) {
+            cout << "Exiting program...\n";
             break;
         }
-        case 8:
-            suffixArrayToBWTDemo(INPUT_DIR);
-            break;
-        case 9:
-            BWT::testEfficientBWT(INPUT_DIR, getSelectedFiles(INPUT_DIR, 7));
-            break;
-        case 10:
-            lz77Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 11:
-            lzssAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 12:
-            lz78Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 13:
-            lzwAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
-            break;
-        case 14:
-            cout << "Exiting program...\n";
-            return 0;
-        default:
-            cout << "Invalid choice. Please select 1-14.\n";
-            break;
+
+        if (mode == 2) {
+            while (true) {
+                printCompressorsMenu();
+                int compMode;
+                cin >> compMode;
+
+                if (compMode == 3) break;
+
+                if (compMode == 1) {
+                    runCompressorsOnAllFiles(INPUT_DIR, COMPRESSOR_DIR);
+                }
+                else if (compMode == 2) {
+                    runSpecificCompressor(INPUT_DIR, COMPRESSOR_DIR);
+                }
+                else {
+                    cout << "Invalid choice\n";
+                }
+            }
+        }
+        else if (mode == 1) {
+            while (true) {
+                printDebugMenu();
+                int debugChoice;
+                cin >> debugChoice;
+
+                if (debugChoice == 15) break;
+
+                if (debugChoice == 14) {
+                    Analysis::runAllAnalyses(INPUT_DIR, ENCODED_DIR, DECODED_DIR);
+                }
+                else {
+                    switch (debugChoice) {
+                    case 1: Analysis::rleAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 2: Analysis::entropyAnalysis(INPUT_DIR); break;
+                    case 3: Analysis::mtfAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 4: Analysis::huffmanAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 5: Analysis::huffmanCanonicalAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 6: Analysis::testOnBanana(); break;
+                    case 7: Analysis::testBWTAndRLE(INPUT_DIR); break;
+                    case 8: Analysis::suffixArrayToBWTDemo(INPUT_DIR); break;
+                    case 9: Analysis::testEfficientBWT(INPUT_DIR); break;
+                    case 10: Analysis::lz77Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 11: Analysis::lzssAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 12: Analysis::lz78Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 13: Analysis::lzwAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    default: cout << "Invalid choice\n"; break;
+                    }
+                }
+            }
+        }
+        else {
+            cout << "Invalid choice. Please select 1-3.\n";
         }
     }
 

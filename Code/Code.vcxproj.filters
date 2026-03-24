@@ -54,6 +54,12 @@
     <ClInclude Include="huffman_canonical.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="compressors.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="analysis.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -93,6 +99,12 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="huffman_canonical.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="compressors.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="analysis.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

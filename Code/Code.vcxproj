@@ -127,8 +127,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="analysis.h" />
     <ClInclude Include="bitstream.h" />
     <ClInclude Include="bwt.h" />
+    <ClInclude Include="compressors.h" />
     <ClInclude Include="entropy.h" />
     <ClInclude Include="huffman.h" />
     <ClInclude Include="huffman_canonical.h" />
@@ -142,8 +144,10 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="analysis.cpp" />
     <ClCompile Include="bitstream.cpp" />
     <ClCompile Include="bwt.cpp" />
+    <ClCompile Include="compressors.cpp" />
     <ClCompile Include="entropy.cpp" />
     <ClCompile Include="huffman.cpp" />
     <ClCompile Include="huffman_canonical.cpp" />
