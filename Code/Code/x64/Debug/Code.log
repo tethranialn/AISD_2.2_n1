@@ -1,4 +1,2 @@
-﻿  rle.cpp
-C:\Users\tetramania\Documents\.Study\AISD_2.2_n1\Code\rle.cpp(246,32): warning C4244: инициализация: преобразование "size_t" в "double", возможна потеря данных
-C:\Users\tetramania\Documents\.Study\AISD_2.2_n1\Code\rle.cpp(247,32): warning C4244: инициализация: преобразование "size_t" в "double", возможна потеря данных
-  Code.vcxproj -> C:\Users\tetramania\Documents\.Study\AISD_2.2_n1\Code\x64\Debug\Code.exe
+﻿  main.cpp
+  Code.vcxproj -> C:\Users\chivo\Documents\AISD_2.2_n1\Code\x64\Debug\Code.exe

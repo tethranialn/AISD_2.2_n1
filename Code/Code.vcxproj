@@ -128,13 +128,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="bitstream.h" />
+    <ClInclude Include="bwt.h" />
+    <ClInclude Include="entropy.h" />
+    <ClInclude Include="huffman.h" />
+    <ClInclude Include="mtf.h" />
     <ClInclude Include="raw_convert.h" />
     <ClInclude Include="rle.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitstream.cpp" />
+    <ClCompile Include="bwt.cpp" />
+    <ClCompile Include="entropy.cpp" />
+    <ClCompile Include="huffman.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mtf.cpp" />
     <ClCompile Include="raw_convert.cpp" />
     <ClCompile Include="rle.cpp" />
   </ItemGroup>
