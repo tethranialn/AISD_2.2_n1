@@ -9,8 +9,8 @@
 
 using namespace std;
 
-// Константы
-const uint32_t LZ77_MAGIC = 0x4C5A3737; // "LZ77"
+
+const uint32_t LZ77_MAGIC = 0x4C5A3737; 
 const uint8_t LZ77_VERSION = 1;
 
 uint32_t LZ77::calculateChecksum(const vector<uint8_t>& data) {

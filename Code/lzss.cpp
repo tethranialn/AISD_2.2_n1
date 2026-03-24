@@ -9,8 +9,8 @@
 
 using namespace std;
 
-// Константы
-const uint32_t LZSS_MAGIC = 0x4C5A5353; // "LZSS"
+
+const uint32_t LZSS_MAGIC = 0x4C5A5353; 
 const uint8_t LZSS_VERSION = 1;
 
 uint32_t LZSS::calculateChecksum(const vector<uint8_t>& data) {
@@ -67,16 +67,16 @@ vector<uint8_t> LZSS::encodeTokens(const vector<uint8_t>& input,
     while (pos < n) {
         auto [offset, length] = findLongestMatch(input, pos, windowSize, lookaheadSize);
 
-        // В LZSS используем совпадение только если длина >= 3
+       
         if (length >= 3) {
-            // Флаг 0 означает ссылку
+            
             writer.writeBit(0);
             writer.writeBits(offset, 16);
             writer.writeBits(length, 16);
             pos += length;
         }
         else {
-            // Флаг 1 означает литерал
+           
             writer.writeBit(1);
             writer.writeBits(input[pos], 8);
             pos++;
@@ -96,13 +96,13 @@ vector<uint8_t> LZSS::decodeTokens(const vector<uint8_t>& compressed, size_t ori
         uint8_t flag = reader.readBit();
 
         if (flag == 1) {
-            // Литерал
+            
             if (!reader.hasMore()) break;
             uint8_t literal = static_cast<uint8_t>(reader.readBits(8));
             output.push_back(literal);
         }
         else {
-            // Ссылка (offset, length)
+            
             if (!reader.hasMore()) break;
             uint16_t offset = static_cast<uint16_t>(reader.readBits(16));
             if (!reader.hasMore()) break;
@@ -260,14 +260,14 @@ LZSSStats LZSS::compressFile(const string& inputPath,
 
     stats.originalSize = inputData.size();
 
-    // Кодируем данные
+  
     vector<uint8_t> encodedData = encode(inputData, windowSize, lookaheadSize);
     stats.compressedSize = encodedData.size();
     stats.compressionRatio = (double)stats.compressedSize / stats.originalSize * 100.0;
     stats.compressionFactor = (double)stats.originalSize / stats.compressedSize;
     stats.savingsPercent = 100.0 - stats.compressionRatio;
 
-    // Подсчитываем статистику по токенам
+    
     stats.numLiterals = 0;
     stats.numMatches = 0;
 
@@ -296,7 +296,7 @@ LZSSStats LZSS::compressFile(const string& inputPath,
         stats.averageOffset = totalOffset / stats.numMatches;
     }
 
-    // Сохраняем сжатые данные
+    
     ofstream outFile(outputPath, ios::binary);
     if (!outFile.is_open()) {
         errorMsg = "Cannot create output file: " + outputPath;

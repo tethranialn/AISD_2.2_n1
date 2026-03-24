@@ -11,8 +11,8 @@
 
 using namespace std;
 
-// Константы
-const uint32_t LZ78_MAGIC = 0x4C5A3738; // "LZ78"
+
+const uint32_t LZ78_MAGIC = 0x4C5A3738; 
 const uint8_t LZ78_VERSION = 1;
 
 uint32_t LZ78::calculateChecksum(const vector<uint8_t>& data) {
@@ -31,10 +31,10 @@ uint8_t LZ78::getIndexBitSize(uint32_t maxDictSize) {
 vector<uint8_t> LZ78::encodeTokens(const vector<uint8_t>& input, uint32_t maxDictSize) {
     BitWriter writer;
 
-    // Словарь: фраза -> индекс
+    
     map<vector<uint8_t>, uint32_t> dictionary;
 
-    // Инициализируем словарь пустой фразой
+ 
     vector<uint8_t> empty;
     dictionary[empty] = 0;
 
@@ -49,29 +49,29 @@ vector<uint8_t> LZ78::encodeTokens(const vector<uint8_t>& input, uint32_t maxDic
     while (pos < n) {
         current.push_back(input[pos]);
 
-        // Если фраза есть в словаре и это не последний символ, продолжаем
+        
         if (dictionary.find(current) != dictionary.end() && pos + 1 < n) {
             pos++;
             continue;
         }
 
-        // Кодируем
+        
         vector<uint8_t> prefix(current.begin(), current.end() - 1);
         uint8_t lastChar = current.back();
 
         uint32_t prefixIndex = dictionary[prefix];
 
-        // Записываем индекс префикса
+        
         writer.writeBits(prefixIndex, indexBitSize);
-        // Записываем последний символ
+        
         writer.writeBits(lastChar, 8);
 
-        // Добавляем новую фразу в словарь
+        
         if (nextIndex < maxDictSize) {
             dictionary[current] = nextIndex++;
         }
 
-        // Сбрасываем текущую фразу
+        
         current.clear();
         pos++;
     }
@@ -85,7 +85,7 @@ vector<uint8_t> LZ78::decodeTokens(const vector<uint8_t>& compressed, size_t ori
     vector<uint8_t> output;
     output.reserve(originalSize);
 
-    // Словарь для декодирования: индекс -> фраза
+    
     map<uint32_t, vector<uint8_t>> dictionary;
     dictionary[0] = vector<uint8_t>();
 
@@ -93,15 +93,15 @@ vector<uint8_t> LZ78::decodeTokens(const vector<uint8_t>& compressed, size_t ori
     uint8_t indexBitSize = getIndexBitSize(maxDictSize);
 
     while (output.size() < originalSize && reader.hasMore()) {
-        // Читаем индекс префикса
+   
         if (!reader.hasMore()) break;
         uint32_t prefixIndex = static_cast<uint32_t>(reader.readBits(indexBitSize));
 
-        // Читаем следующий символ
+        
         if (!reader.hasMore()) break;
         uint8_t nextChar = static_cast<uint8_t>(reader.readBits(8));
 
-        // Восстанавливаем фразу
+        
         vector<uint8_t> phrase;
 
         auto it = dictionary.find(prefixIndex);
@@ -111,14 +111,14 @@ vector<uint8_t> LZ78::decodeTokens(const vector<uint8_t>& compressed, size_t ori
 
         phrase.push_back(nextChar);
 
-        // Выводим фразу
+        
         for (uint8_t c : phrase) {
             if (output.size() < originalSize) {
                 output.push_back(c);
             }
         }
 
-        // Добавляем фразу в словарь
+       
         if (nextIndex < maxDictSize) {
             dictionary[nextIndex++] = phrase;
         }
@@ -272,7 +272,6 @@ LZ78Stats LZ78::compressFile(const string& inputPath,
 
     stats.originalSize = inputData.size();
 
-    // Подсчитываем статистику
     map<vector<uint8_t>, uint32_t> dictionary;
     vector<uint8_t> empty;
     dictionary[empty] = 0;
@@ -314,14 +313,14 @@ LZ78Stats LZ78::compressFile(const string& inputPath,
     }
     stats.dictSize = min(nextIndex, maxDictSize);
 
-    // Кодируем данные
+
     vector<uint8_t> encodedData = encode(inputData, maxDictSize);
     stats.compressedSize = encodedData.size();
     stats.compressionRatio = (double)stats.compressedSize / stats.originalSize * 100.0;
     stats.compressionFactor = (double)stats.originalSize / stats.compressedSize;
     stats.savingsPercent = 100.0 - stats.compressionRatio;
 
-    // Сохраняем сжатые данные
+ 
     ofstream outFile(outputPath, ios::binary);
     if (!outFile.is_open()) {
         errorMsg = "Cannot create output file: " + outputPath;

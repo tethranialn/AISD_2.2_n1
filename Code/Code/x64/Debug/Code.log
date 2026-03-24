@@ -1,5 +1,19 @@
 ﻿  analysis.cpp
+  bitstream.cpp
+  bwt.cpp
   compressors.cpp
+  entropy.cpp
+  huffman.cpp
+  huffman_canonical.cpp
+  lz77.cpp
+  lz78.cpp
+  lzss.cpp
+  lzw.cpp
   main.cpp
+  mtf.cpp
+  raw_convert.cpp
+  rle.cpp
+C:\Users\chivo\Documents\AISD_2.2_n1\Code\rle.cpp(246,32): warning C4244: инициализация: преобразование "size_t" в "double", возможна потеря данных
+C:\Users\chivo\Documents\AISD_2.2_n1\Code\rle.cpp(247,32): warning C4244: инициализация: преобразование "size_t" в "double", возможна потеря данных
   Создание кода...
   Code.vcxproj -> C:\Users\chivo\Documents\AISD_2.2_n1\Code\x64\Debug\Code.exe

@@ -270,7 +270,7 @@ bool Huffman::decodeFile(const string& inputPath, const string& outputPath, stri
     return true;
 }
 
-// ... (предыдущие реализации остаются без изменений) ...
+
 
 bool Huffman::encodeFileWithStats(const string& inputPath, const string& outputPath,
     CompressionStatsHuffman& stats, string& errorMsg) {
@@ -410,7 +410,7 @@ bool Huffman::decodeFileWithVerify(const string& inputPath, const string& output
     return true;
 }
 
-// ... (остальные методы без изменений) ...
+
 
 bool Huffman::verifyCycle(const string& inputPath, const string& encodedPath,
     const string& decodedPath, string& errorMsg) {

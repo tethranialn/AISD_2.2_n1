@@ -11,8 +11,7 @@
 
 using namespace std;
 
-// Константы
-const uint32_t LZW_MAGIC = 0x4C5A57; // "LZW"
+const uint32_t LZW_MAGIC = 0x4C5A57; 
 const uint8_t LZW_VERSION = 1;
 
 uint32_t LZW::calculateChecksum(const vector<uint8_t>& data) {
@@ -31,7 +30,7 @@ uint8_t LZW::getCodeBitSize(uint32_t maxDictSize) {
 map<vector<uint8_t>, uint32_t> LZW::buildInitialDictionary() {
     map<vector<uint8_t>, uint32_t> dictionary;
 
-    // Инициализируем словарь всеми возможными байтами (0-255)
+  
     for (int i = 0; i < 256; i++) {
         vector<uint8_t> entry;
         entry.push_back(static_cast<uint8_t>(i));
@@ -48,9 +47,9 @@ vector<uint8_t> LZW::encodeTokens(const vector<uint8_t>& input, uint32_t maxDict
         return writer.getData();
     }
 
-    // Инициализируем словарь всеми возможными байтами
+   
     map<vector<uint8_t>, uint32_t> dictionary = buildInitialDictionary();
-    uint32_t nextCode = 256; // Следующий доступный код
+    uint32_t nextCode = 256; 
     uint8_t codeBitSize = getCodeBitSize(maxDictSize);
 
     vector<uint8_t> current;
@@ -63,29 +62,28 @@ vector<uint8_t> LZW::encodeTokens(const vector<uint8_t>& input, uint32_t maxDict
         vector<uint8_t> next = current;
         next.push_back(input[pos]);
 
-        // Если строка есть в словаре, продолжаем
+       
         if (dictionary.find(next) != dictionary.end()) {
             current = next;
             pos++;
             continue;
         }
 
-        // Кодируем текущую строку
         uint32_t code = dictionary[current];
         writer.writeBits(code, codeBitSize);
 
-        // Добавляем новую строку в словарь, если не превышен лимит
+       
         if (nextCode < maxDictSize) {
             dictionary[next] = nextCode++;
         }
 
-        // Начинаем новую строку с текущего символа
+        
         current.clear();
         current.push_back(input[pos]);
         pos++;
     }
 
-    // Кодируем последнюю строку
+ 
     if (!current.empty()) {
         uint32_t code = dictionary[current];
         writer.writeBits(code, codeBitSize);
@@ -106,12 +104,10 @@ vector<uint8_t> LZW::decodeTokens(const vector<uint8_t>& compressed,
         return output;
     }
 
-    // Для декодирования LZW не нужно сохранять начальный словарь отдельно,
-    // так как он всегда одинаковый для всех данных (0-255)
-    // Словарь восстанавливается в процессе декодирования
+   
     map<uint32_t, vector<uint8_t>> dictionary;
 
-    // Инициализируем словарь всеми возможными байтами
+
     for (int i = 0; i < 256; i++) {
         vector<uint8_t> entry;
         entry.push_back(static_cast<uint8_t>(i));
@@ -121,7 +117,7 @@ vector<uint8_t> LZW::decodeTokens(const vector<uint8_t>& compressed,
     uint32_t nextCode = 256;
     uint8_t codeBitSize = getCodeBitSize(maxDictSize);
 
-    // Читаем первый код
+   
     if (!reader.hasMore()) {
         return output;
     }
@@ -135,24 +131,24 @@ vector<uint8_t> LZW::decodeTokens(const vector<uint8_t>& compressed,
 
         vector<uint8_t> currentString;
 
-        // Если код есть в словаре
+        
         if (dictionary.find(currentCode) != dictionary.end()) {
             currentString = dictionary[currentCode];
         }
-        // Специальный случай: код равен следующему доступному
+      
         else if (currentCode == nextCode) {
             currentString = prevString;
             currentString.push_back(prevString[0]);
         }
         else {
-            // Ошибка: неизвестный код
+           
             return vector<uint8_t>();
         }
 
-        // Выводим строку
+      
         output.insert(output.end(), currentString.begin(), currentString.end());
 
-        // Добавляем новую строку в словарь
+        
         if (nextCode < maxDictSize) {
             vector<uint8_t> newString = prevString;
             newString.push_back(currentString[0]);
@@ -311,7 +307,7 @@ LZWStats LZW::compressFile(const string& inputPath,
 
     stats.originalSize = inputData.size();
 
-    // Подсчитываем статистику
+ 
     map<vector<uint8_t>, uint32_t> dictionary = buildInitialDictionary();
     uint32_t nextCode = 256;
 
@@ -320,7 +316,7 @@ LZWStats LZW::compressFile(const string& inputPath,
 
     size_t pos = 1;
     size_t n = inputData.size();
-    stats.numCodes = 1; // Первый код
+    stats.numCodes = 1; 
 
     while (pos < n) {
         vector<uint8_t> next = current;
@@ -332,7 +328,7 @@ LZWStats LZW::compressFile(const string& inputPath,
             continue;
         }
 
-        // Добавляем новый код
+        
         stats.numCodes++;
         if (nextCode < maxDictSize) {
             dictionary[next] = nextCode++;
@@ -347,14 +343,14 @@ LZWStats LZW::compressFile(const string& inputPath,
     uint8_t codeBitSize = getCodeBitSize(maxDictSize);
     stats.averageCodeLength = codeBitSize;
 
-    // Кодируем данные
+  
     vector<uint8_t> encodedData = encode(inputData, maxDictSize);
     stats.compressedSize = encodedData.size();
     stats.compressionRatio = (double)stats.compressedSize / stats.originalSize * 100.0;
     stats.compressionFactor = (double)stats.originalSize / stats.compressedSize;
     stats.savingsPercent = 100.0 - stats.compressionRatio;
 
-    // Сохраняем сжатые данные
+   
     ofstream outFile(outputPath, ios::binary);
     if (!outFile.is_open()) {
         errorMsg = "Cannot create output file: " + outputPath;
