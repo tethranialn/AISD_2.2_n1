@@ -67,6 +67,25 @@ public:
 
     static void printAnalysisSummary(const std::vector<AlgorithmResult>& results);
 
+    static void bwtMtfEntropyAnalysis(const std::string& inputDir);
+
+    static void lzssBufferAnalysis(const std::string& inputDir);
+
+    static void lzwDictAnalysis(const std::string& inputDir);
+
+    static void runAllParameterResearch(const std::string& inputDir);
+
+    static void runAllCompressorsBenchmark(const std::string& inputDir,
+        const std::string& encodedDir,
+        const std::string& decodedDir);
+
+    static void entropyVsSymbolLength(const std::string& inputDir);
+
+    static void arithmeticPrecisionTest();
+
+    static void mtfEntropyComparison(const std::string& inputDir);
+    static void mtfEntropyComparisonAllFiles(const std::string& inputDir);
+
 private:
     static bool fileExists(const std::string& path);
     static std::vector<std::string> getSelectedFiles(const std::string& inputDir, int choice);

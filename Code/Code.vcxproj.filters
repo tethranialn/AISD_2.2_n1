@@ -60,6 +60,9 @@
     <ClInclude Include="analysis.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="arithmetic.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -105,6 +108,9 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="analysis.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="arithmetic.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>

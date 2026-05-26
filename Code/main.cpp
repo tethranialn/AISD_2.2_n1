@@ -174,12 +174,21 @@ void printDebugMenu() {
     cout << "13. LZW Compression Analysis\n";
     cout << "14. Run ALL Analyses on ALL Files\n";
     cout << "15. Back to main menu\n";
+    cout << "16. BWT+MTF Entropy vs Block Size Research\n";
+    cout << "17. LZSS Buffer Size vs Compression Ratio\n";
+    cout << "18. LZW Dictionary Size vs Compression Ratio\n";
+    cout << "19. Run ALL Parameter Research (BWT, LZSS, LZW)\n";
+    cout << "20. Run ALL Compressors Benchmark (Table)\n";
+    cout << "21. Entropy vs Symbol Length (1-4 bytes)\n";
+    cout << "22. Arithmetic Coding Precision Test (double limit)\n";
+    cout << "23. MTF Entropy Comparison (Select files)\n";
+    cout << "24. MTF Entropy Comparison (All files)\n";
     cout << "========================================\n";
     cout << "Choose algorithm (1-15): ";
 }
 
 int main() {
-    const string BASE_PATH = "C:\\Users\\chivo\\Documents\\AISD_2.2_n1";
+    const string BASE_PATH = "C:\\Users\\tetramania\\Documents\\.Study\\AISD\\AISD_2.2_n1";
     const string INPUT_DIR = BASE_PATH + "\\Input files";
     const string ENCODED_DIR = BASE_PATH + "\\Encoded files";
     const string DECODED_DIR = BASE_PATH + "\\Decoded files";
@@ -270,6 +279,15 @@ int main() {
                     case 11: Analysis::lzssAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
                     case 12: Analysis::lz78Analysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
                     case 13: Analysis::lzwAnalysis(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 16: Analysis::bwtMtfEntropyAnalysis(INPUT_DIR); break;
+                    case 17: Analysis::lzssBufferAnalysis(INPUT_DIR); break;
+                    case 18: Analysis::lzwDictAnalysis(INPUT_DIR); break;
+                    case 19: Analysis::runAllParameterResearch(INPUT_DIR); break;
+                    case 20: Analysis::runAllCompressorsBenchmark(INPUT_DIR, ENCODED_DIR, DECODED_DIR); break;
+                    case 21: Analysis::entropyVsSymbolLength(INPUT_DIR); break;
+                    case 22: Analysis::arithmeticPrecisionTest(); break;
+                    case 23: Analysis::mtfEntropyComparison(INPUT_DIR); break;
+                    case 24: Analysis::mtfEntropyComparisonAllFiles(INPUT_DIR); break;
                     default: cout << "Invalid choice\n"; break;
                     }
                 }

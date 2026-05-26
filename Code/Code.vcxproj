@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="analysis.h" />
+    <ClInclude Include="arithmetic.h" />
     <ClInclude Include="bitstream.h" />
     <ClInclude Include="bwt.h" />
     <ClInclude Include="compressors.h" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="analysis.cpp" />
+    <ClCompile Include="arithmetic.cpp" />
     <ClCompile Include="bitstream.cpp" />
     <ClCompile Include="bwt.cpp" />
     <ClCompile Include="compressors.cpp" />

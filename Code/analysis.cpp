@@ -1,4 +1,5 @@
 #include "analysis.h"
+#include "arithmetic.h"
 #include "raw_convert.h"
 #include "rle.h"
 #include "entropy.h"
@@ -1323,4 +1324,656 @@ void Analysis::printAnalysisSummary(const vector<AlgorithmResult>& results) {
     }
 
     cout << "\n";
+}
+
+void Analysis::bwtMtfEntropyAnalysis(const string& inputDir) {
+    cout << "\n========================================\n";
+    cout << "BWT+MTF Entropy vs Block Size\n";
+    cout << "========================================\n\n";
+
+    printFileSelectionMenu();
+    int choice;
+    cin >> choice;
+
+    if (choice == 8) {
+        cout << "Operation cancelled\n";
+        return;
+    }
+
+    vector<string> files = getSelectedFiles(inputDir, choice);
+    if (files.empty()) {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    vector<size_t> blockSizes = { 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+
+    cout << "File,BlockSize,OriginalEntropy,EntropyAfterBWTMTF\n";
+
+    for (const auto& filename : files) {
+        string filePath = inputDir + "\\" + filename;
+
+        if (!fileExists(filePath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        ifstream inFile(filePath, ios::binary);
+        vector<uint8_t> data((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        double originalEntropy = EntropyCalculator::calculate(data, 1).entropy;
+
+        cout << "\nFile: " << filename << "\n";
+        cout << "Original entropy: " << fixed << setprecision(4) << originalEntropy << " bits/byte\n";
+        cout << "----------------------------------------\n";
+        cout << "BlockSize(bytes)\tEntropy after BWT+MTF (bits/byte)\n";
+
+        for (size_t bs : blockSizes) {
+            if (bs > data.size()) break;
+
+            BWTBlockResult bwtResult = BWT::encodeEfficientBlocked(data, bs);
+            vector<uint8_t> mtfResult = MTF::encode(bwtResult.transformed);
+            double entropyAfter = EntropyCalculator::calculate(mtfResult, 1).entropy;
+
+            cout << bs << "\t\t\t" << fixed << setprecision(4) << entropyAfter << "\n";
+            cout << filename << "," << bs << "," << originalEntropy << "," << entropyAfter << "\n";
+        }
+        cout << "\n";
+    }
+}
+
+void Analysis::lzssBufferAnalysis(const string& inputDir) {
+    cout << "\n========================================\n";
+    cout << "LZSS Compression Ratio vs Buffer Size\n";
+    cout << "========================================\n\n";
+
+    printFileSelectionMenu();
+    int choice;
+    cin >> choice;
+
+    if (choice == 8) {
+        cout << "Operation cancelled\n";
+        return;
+    }
+
+    vector<string> files = getSelectedFiles(inputDir, choice);
+    if (files.empty()) {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    vector<uint32_t> bufferSizes = { 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+    uint32_t lookaheadSize = 16;
+
+    cout << "File,BufferSize,OriginalSize,CompressedSize,Ratio\n";
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+
+        if (!fileExists(inputPath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        ifstream inFile(inputPath, ios::binary);
+        vector<uint8_t> data((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        cout << "\nFile: " << filename << "\n";
+        cout << "Original size: " << data.size() << " bytes\n";
+        cout << "----------------------------------------\n";
+        cout << "BufferSize(bytes)\tCompressedSize(bytes)\tRatio(%)\n";
+
+        for (uint32_t bs : bufferSizes) {
+            string encodedPath = "temp_lzss_" + filename + ".lzss";
+            string errorMsg;
+
+            LZSSStats stats = LZSS::compressFile(inputPath, encodedPath, bs, lookaheadSize, errorMsg);
+
+            if (errorMsg.empty()) {
+                cout << bs << "\t\t\t" << stats.compressedSize << "\t\t\t"
+                    << fixed << setprecision(2) << stats.compressionRatio << "\n";
+                cout << filename << "," << bs << "," << stats.compressedSize << ","
+                    << stats.compressionRatio << "\n";
+            }
+
+            remove(encodedPath.c_str());
+        }
+        cout << "\n";
+    }
+}
+
+void Analysis::lzwDictAnalysis(const string& inputDir) {
+    cout << "\n========================================\n";
+    cout << "LZW Compression Ratio vs Dictionary Size\n";
+    cout << "========================================\n\n";
+
+    printFileSelectionMenu();
+    int choice;
+    cin >> choice;
+
+    if (choice == 8) {
+        cout << "Operation cancelled\n";
+        return;
+    }
+
+    vector<string> files = getSelectedFiles(inputDir, choice);
+    if (files.empty()) {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    vector<uint32_t> dictSizes = { 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+
+    cout << "File,DictSize,OriginalSize,CompressedSize,Ratio\n";
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+
+        if (!fileExists(inputPath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        ifstream inFile(inputPath, ios::binary);
+        vector<uint8_t> data((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        cout << "\nFile: " << filename << "\n";
+        cout << "Original size: " << data.size() << " bytes\n";
+        cout << "----------------------------------------\n";
+        cout << "DictSize(bytes)\tCompressedSize(bytes)\tRatio(%)\n";
+
+        for (uint32_t ds : dictSizes) {
+            if (ds > 65536) break;
+
+            string encodedPath = "temp_lzw_" + filename + ".lzw";
+            string errorMsg;
+
+            LZWStats stats = LZW::compressFile(inputPath, encodedPath, ds, errorMsg);
+
+            if (errorMsg.empty()) {
+                double ratio = (double)stats.compressedSize / stats.originalSize * 100.0;
+                cout << ds << "\t\t\t" << stats.compressedSize << "\t\t\t"
+                    << fixed << setprecision(2) << ratio << "\n";
+                cout << filename << "," << ds << "," << stats.compressedSize << ","
+                    << ratio << "\n";
+            }
+
+            remove(encodedPath.c_str());
+        }
+        cout << "\n";
+    }
+}
+
+void Analysis::runAllParameterResearch(const string& inputDir) {
+    cout << "\n========================================\n";
+    cout << "PARAMETER RESEARCH FOR BWT, LZSS, LZW\n";
+    cout << "========================================\n";
+    cout << "This will collect data for graphs.\n";
+    cout << "Copy the output to CSV files for plotting.\n\n";
+
+    vector<string> files = { "enwik7.txt", "RusText.txt", "BW.raw", "Gray.raw", "RGB.raw", "BIN.bin" };
+    vector<size_t> blockSizes = { 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
+    vector<uint32_t> bufferSizes = { 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+    vector<uint32_t> dictSizes = { 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+
+    cout << "========================================\n";
+    cout << "PART 1: BWT+MTF ENTROPY VS BLOCK SIZE\n";
+    cout << "========================================\n\n";
+
+    for (const auto& filename : files) {
+        string filePath = inputDir + "\\" + filename;
+        if (!fileExists(filePath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        ifstream inFile(filePath, ios::binary);
+        vector<uint8_t> data((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        double originalEntropy = EntropyCalculator::calculate(data, 1).entropy;
+
+        cout << "# FILE: " << filename << "\n";
+        cout << "# Original size: " << data.size() << " bytes\n";
+        cout << "# Original entropy: " << fixed << setprecision(6) << originalEntropy << " bits/byte\n";
+        cout << "BlockSize_Bytes,Entropy_After_BWT_MTF_bits_per_byte\n";
+
+        for (size_t bs : blockSizes) {
+            if (bs > data.size()) continue;
+
+            BWTBlockResult bwtResult = BWT::encodeEfficientBlocked(data, bs);
+            vector<uint8_t> mtfResult = MTF::encode(bwtResult.transformed);
+            double entropyAfter = EntropyCalculator::calculate(mtfResult, 1).entropy;
+
+            cout << bs << "," << fixed << setprecision(6) << entropyAfter << "\n";
+        }
+        cout << "\n";
+    }
+
+    cout << "========================================\n";
+    cout << "PART 2: LZSS COMPRESSION RATIO VS BUFFER SIZE\n";
+    cout << "========================================\n\n";
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+        if (!fileExists(inputPath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        ifstream inFile(inputPath, ios::binary);
+        vector<uint8_t> data((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        size_t originalSize = data.size();
+
+        cout << "# FILE: " << filename << "\n";
+        cout << "# Original size: " << originalSize << " bytes\n";
+        cout << "BufferSize_Bytes,CompressedSize_Bytes,CompressionRatio\n";
+
+        for (uint32_t bs : bufferSizes) {
+            vector<uint8_t> encoded = LZSS::encode(data, bs, 16);
+            double ratio = (double)originalSize / encoded.size();
+            cout << bs << "," << encoded.size() << "," << fixed << setprecision(6) << ratio << "\n";
+        }
+        cout << "\n";
+    }
+
+    cout << "========================================\n";
+    cout << "PART 3: LZW COMPRESSION RATIO VS DICTIONARY SIZE\n";
+    cout << "========================================\n\n";
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+        if (!fileExists(inputPath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        ifstream inFile(inputPath, ios::binary);
+        vector<uint8_t> data((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        size_t originalSize = data.size();
+
+        cout << "# FILE: " << filename << "\n";
+        cout << "# Original size: " << originalSize << " bytes\n";
+        cout << "DictSize_Entries,CompressedSize_Bytes,CompressionRatio\n";
+
+        for (uint32_t ds : dictSizes) {
+            if (ds > originalSize * 2) break;
+            vector<uint8_t> encoded = LZW::encode(data, ds);
+            double ratio = (double)originalSize / encoded.size();
+            cout << ds << "," << encoded.size() << "," << fixed << setprecision(6) << ratio << "\n";
+        }
+        cout << "\n";
+    }
+}
+
+void Analysis::runAllCompressorsBenchmark(const string& inputDir,
+    const string& encodedDir,
+    const string& decodedDir) {
+    cout << "\n========================================\n";
+    cout << "ALL COMPRESSORS BENCHMARK\n";
+    cout << "========================================\n\n";
+
+    printFileSelectionMenu();
+    int choice;
+    cin >> choice;
+
+    if (choice == 8) {
+        cout << "Operation cancelled\n";
+        return;
+    }
+
+    vector<string> files = getSelectedFiles(inputDir, choice);
+    if (files.empty()) {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    vector<pair<string, string>> compressors = {
+        {"HA", "Canonical Huffman"},
+        {"RLE", "Run-Length Encoding"},
+        {"BWT+RLE", "BWT + RLE"},
+        {"BWT+MTF+HA", "BWT + MTF + Huffman"},
+        {"BWT+MTF+RLE+HA", "BWT + MTF + RLE + Huffman"},
+        {"LZSS", "LZSS"},
+        {"LZSS+HA", "LZSS + Huffman"},
+        {"LZW", "LZW"},
+        {"LZW+HA", "LZW + Huffman"}
+    };
+
+    cout << "RESULTS TABLE (CSV format):\n\n";
+    cout << "File,Compressor,OriginalBytes,CompressedBytes,DecompressedBytes,RatioPercent,Factor\n";
+
+    for (const auto& filename : files) {
+        string inputPath = inputDir + "\\" + filename;
+
+        if (!fileExists(inputPath)) {
+            cerr << "File not found: " << filename << "\n";
+            continue;
+        }
+
+        ifstream inFile(inputPath, ios::binary);
+        vector<uint8_t> originalData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        size_t originalSize = originalData.size();
+
+        for (const auto& comp : compressors) {
+            string algo = comp.first;
+            string encodedPath = encodedDir + "\\" + filename + "_" + algo + ".bin";
+            string decodedPath = decodedDir + "\\" + filename + "_" + algo + ".dec";
+            string errorMsg;
+
+            size_t compressedSize = 0;
+            bool success = false;
+            bool verified = false;
+
+            try {
+                if (algo == "HA") {
+                    if (HuffmanCanonical::encodeFile(inputPath, encodedPath, errorMsg)) {
+                        ifstream ef(encodedPath, ios::binary);
+                        vector<uint8_t> ed((istreambuf_iterator<char>(ef)), istreambuf_iterator<char>());
+                        compressedSize = ed.size();
+                        ef.close();
+                        success = true;
+                        verified = HuffmanCanonical::verifyCycle(inputPath, encodedPath, decodedPath, errorMsg);
+                    }
+                }
+                else if (algo == "RLE") {
+                    if (RLE::encodeFile(inputPath, encodedPath, 1, 2, errorMsg)) {
+                        ifstream ef(encodedPath, ios::binary);
+                        vector<uint8_t> ed((istreambuf_iterator<char>(ef)), istreambuf_iterator<char>());
+                        compressedSize = ed.size();
+                        ef.close();
+                        success = true;
+                        verified = RLE::verifyCycle(inputPath, encodedPath, decodedPath, 1, 2, errorMsg);
+                    }
+                }
+                else if (algo == "BWT+RLE") {
+                    ifstream inf(inputPath, ios::binary);
+                    vector<uint8_t> data((istreambuf_iterator<char>(inf)), istreambuf_iterator<char>());
+                    inf.close();
+
+                    BWTResult bwtResult = BWT::encodeEfficient(data);
+                    vector<uint8_t> rleEncoded = RLE::encode(bwtResult.transformed, 1, 2);
+
+                    compressedSize = rleEncoded.size();
+                    success = true;
+
+                    vector<uint8_t> rleDecoded = RLE::decode(rleEncoded, 1, 2);
+                    if (rleDecoded.size() > 0) {
+                        uint64_t primaryIdx = bwtResult.primaryIndex;
+                        vector<uint8_t> decodedData = BWT::decode(rleDecoded, primaryIdx);
+                        verified = (decodedData.size() == data.size() &&
+                            memcmp(decodedData.data(), data.data(), data.size()) == 0);
+                    }
+                }
+                else if (algo == "BWT+MTF+HA") {
+                    ifstream inf(inputPath, ios::binary);
+                    vector<uint8_t> data((istreambuf_iterator<char>(inf)), istreambuf_iterator<char>());
+                    inf.close();
+
+                    BWTResult bwtResult = BWT::encodeEfficient(data);
+                    vector<uint8_t> mtfEncoded = MTF::encode(bwtResult.transformed);
+                    vector<uint8_t> haEncoded = HuffmanCanonical::encode(mtfEncoded);
+
+                    ofstream haFile(encodedPath, ios::binary);
+                    haFile.write((char*)haEncoded.data(), haEncoded.size());
+                    haFile.close();
+
+                    compressedSize = haEncoded.size();
+                    success = true;
+
+                    vector<uint8_t> haDecoded = HuffmanCanonical::decode(haEncoded);
+                    vector<uint8_t> mtfDecoded = MTF::decode(haDecoded);
+                    vector<uint8_t> decodedData = BWT::decode(mtfDecoded, bwtResult.primaryIndex);
+                    verified = (decodedData.size() == data.size() &&
+                        memcmp(decodedData.data(), data.data(), data.size()) == 0);
+                }
+                else if (algo == "BWT+MTF+RLE+HA") {
+                    ifstream inf(inputPath, ios::binary);
+                    vector<uint8_t> data((istreambuf_iterator<char>(inf)), istreambuf_iterator<char>());
+                    inf.close();
+
+                    BWTResult bwtResult = BWT::encodeEfficient(data);
+                    vector<uint8_t> mtfEncoded = MTF::encode(bwtResult.transformed);
+                    vector<uint8_t> rleEncoded = RLE::encode(mtfEncoded, 1, 2);
+                    vector<uint8_t> haEncoded = HuffmanCanonical::encode(rleEncoded);
+
+                    ofstream haFile(encodedPath, ios::binary);
+                    haFile.write((char*)haEncoded.data(), haEncoded.size());
+                    haFile.close();
+
+                    compressedSize = haEncoded.size();
+                    success = true;
+
+                    vector<uint8_t> haDecoded = HuffmanCanonical::decode(haEncoded);
+                    vector<uint8_t> rleDecoded = RLE::decode(haDecoded, 1, 2);
+                    vector<uint8_t> mtfDecoded = MTF::decode(rleDecoded);
+                    vector<uint8_t> decodedData = BWT::decode(mtfDecoded, bwtResult.primaryIndex);
+                    verified = (decodedData.size() == data.size() &&
+                        memcmp(decodedData.data(), data.data(), data.size()) == 0);
+                }
+                else if (algo == "LZSS") {
+                    if (LZSS::encodeFile(inputPath, encodedPath, 4096, 16, errorMsg)) {
+                        ifstream ef(encodedPath, ios::binary);
+                        vector<uint8_t> ed((istreambuf_iterator<char>(ef)), istreambuf_iterator<char>());
+                        compressedSize = ed.size();
+                        ef.close();
+                        success = true;
+                        verified = LZSS::verifyCycle(inputPath, encodedPath, decodedPath, 4096, 16, errorMsg);
+                    }
+                }
+                else if (algo == "LZSS+HA") {
+                    ifstream inf(inputPath, ios::binary);
+                    vector<uint8_t> data((istreambuf_iterator<char>(inf)), istreambuf_iterator<char>());
+                    inf.close();
+
+                    vector<uint8_t> lzssEncoded = LZSS::encode(data, 4096, 16);
+                    vector<uint8_t> haEncoded = HuffmanCanonical::encode(lzssEncoded);
+
+                    ofstream haFile(encodedPath, ios::binary);
+                    haFile.write((char*)haEncoded.data(), haEncoded.size());
+                    haFile.close();
+
+                    compressedSize = haEncoded.size();
+                    success = true;
+
+                    vector<uint8_t> haDecoded = HuffmanCanonical::decode(haEncoded);
+                    vector<uint8_t> decodedData = LZSS::decode(haDecoded);
+                    verified = (decodedData.size() == data.size() &&
+                        memcmp(decodedData.data(), data.data(), data.size()) == 0);
+                }
+                else if (algo == "LZW") {
+                    if (LZW::encodeFile(inputPath, encodedPath, 4096, errorMsg)) {
+                        ifstream ef(encodedPath, ios::binary);
+                        vector<uint8_t> ed((istreambuf_iterator<char>(ef)), istreambuf_iterator<char>());
+                        compressedSize = ed.size();
+                        ef.close();
+                        success = true;
+                        verified = LZW::verifyCycle(inputPath, encodedPath, decodedPath, 4096, errorMsg);
+                    }
+                }
+                else if (algo == "LZW+HA") {
+                    ifstream inf(inputPath, ios::binary);
+                    vector<uint8_t> data((istreambuf_iterator<char>(inf)), istreambuf_iterator<char>());
+                    inf.close();
+
+                    vector<uint8_t> lzwEncoded = LZW::encode(data, 4096);
+                    vector<uint8_t> haEncoded = HuffmanCanonical::encode(lzwEncoded);
+
+                    ofstream haFile(encodedPath, ios::binary);
+                    haFile.write((char*)haEncoded.data(), haEncoded.size());
+                    haFile.close();
+
+                    compressedSize = haEncoded.size();
+                    success = true;
+
+                    vector<uint8_t> haDecoded = HuffmanCanonical::decode(haEncoded);
+                    vector<uint8_t> decodedData = LZW::decode(haDecoded);
+                    verified = (decodedData.size() == data.size() &&
+                        memcmp(decodedData.data(), data.data(), data.size()) == 0);
+                }
+            }
+            catch (...) {
+                success = false;
+            }
+
+            if (success && verified) {
+                double ratioPercent = (double)compressedSize / originalSize * 100.0;
+                double factor = (double)originalSize / compressedSize;
+
+                cout << filename << "," << comp.second << ","
+                    << originalSize << "," << compressedSize << ","
+                    << originalSize << ","
+                    << fixed << setprecision(2) << ratioPercent << ","
+                    << fixed << setprecision(2) << factor << "\n";
+            }
+            else {
+                cout << filename << "," << comp.second << ","
+                    << originalSize << ",ERROR,0,0,0\n";
+            }
+
+            remove(encodedPath.c_str());
+            remove(decodedPath.c_str());
+            remove((encodedPath + ".bwt").c_str());
+        }
+    }
+}
+
+void Analysis::entropyVsSymbolLength(const string& inputDir) {
+    cout << "\n========================================\n";
+    cout << "ENTROPY VS SYMBOL LENGTH (1-4 bytes)\n";
+    cout << "========================================\n\n";
+
+    string englishTextFile = inputDir + "\\enwik7.txt";
+
+    if (!fileExists(englishTextFile)) {
+        cout << "File not found: " << englishTextFile << "\n";
+        return;
+    }
+
+    ifstream inFile(englishTextFile, ios::binary);
+    string rawText((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+    inFile.close();
+
+    string filteredText;
+    for (char c : rawText) {
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (uc < 128) {
+            filteredText += c;
+        }
+    }
+
+    vector<uint8_t> data(filteredText.begin(), filteredText.end());
+
+    cout << "# FILE: enwik7.txt (filtered ASCII only)\n";
+    cout << "# Original size: " << rawText.size() << " bytes\n";
+    cout << "# Filtered size: " << data.size() << " bytes\n";
+    cout << "SymbolLength_bytes,Entropy_bits_per_symbol,Entropy_bits_per_byte,UniqueSymbols\n";
+
+    for (uint8_t Ms = 1; Ms <= 4; Ms++) {
+        EntropyResult result = EntropyCalculator::calculate(data, Ms);
+        double entropyPerByte = result.entropy / Ms;
+
+        cout << (int)Ms << ","
+            << fixed << setprecision(6) << result.entropy << ","
+            << fixed << setprecision(6) << entropyPerByte << ","
+            << result.uniqueSymbols << "\n";
+    }
+}
+
+void Analysis::arithmeticPrecisionTest() {
+    Arithmetic::testPrecisionLimit();
+}
+
+void Analysis::mtfEntropyComparison(const string& inputDir) {
+    cout << "\n========================================\n";
+    cout << "MTF ENTROPY COMPARISON\n";
+    cout << "========================================\n\n";
+
+    printFileSelectionMenu();
+    int choice;
+    cin >> choice;
+
+    if (choice == 8) {
+        cout << "Operation cancelled\n";
+        return;
+    }
+
+    vector<string> files = getSelectedFiles(inputDir, choice);
+    if (files.empty()) {
+        cout << "Invalid choice\n";
+        return;
+    }
+
+    cout << "Filename,OriginalEntropy_bits_per_byte,EntropyAfterMTF_bits_per_byte,EntropyChange\n";
+
+    for (const auto& filename : files) {
+        string filePath = inputDir + "\\" + filename;
+
+        if (!fileExists(filePath)) {
+            cout << "File not found: " << filename << " - skipping\n\n";
+            continue;
+        }
+
+        ifstream inFile(filePath, ios::binary);
+        vector<uint8_t> originalData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        double originalEntropy = EntropyCalculator::calculate(originalData, 1).entropy;
+
+        vector<uint8_t> mtfData = MTF::encode(originalData);
+        double mtfEntropy = EntropyCalculator::calculate(mtfData, 1).entropy;
+
+        double entropyChange = mtfEntropy - originalEntropy;
+
+        cout << filename << ","
+            << fixed << setprecision(6) << originalEntropy << ","
+            << fixed << setprecision(6) << mtfEntropy << ","
+            << fixed << setprecision(6) << entropyChange << "\n";
+    }
+
+    cout << "\n";
+}
+
+void Analysis::mtfEntropyComparisonAllFiles(const string& inputDir) {
+    cout << "\n========================================\n";
+    cout << "MTF ENTROPY COMPARISON - ALL FILES\n";
+    cout << "========================================\n\n";
+
+    vector<string> files = { "BW.raw", "Gray.raw", "RGB.raw", "enwik7.txt", "RusText.txt", "BIN.bin" };
+
+    cout << "Filename,OriginalEntropy_bits_per_byte,EntropyAfterMTF_bits_per_byte,EntropyChange\n";
+
+    for (const auto& filename : files) {
+        string filePath = inputDir + "\\" + filename;
+
+        if (!fileExists(filePath)) {
+            cout << "File not found: " << filename << " - skipping\n";
+            continue;
+        }
+
+        ifstream inFile(filePath, ios::binary);
+        vector<uint8_t> originalData((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        inFile.close();
+
+        double originalEntropy = EntropyCalculator::calculate(originalData, 1).entropy;
+
+        vector<uint8_t> mtfData = MTF::encode(originalData);
+        double mtfEntropy = EntropyCalculator::calculate(mtfData, 1).entropy;
+
+        double entropyChange = mtfEntropy - originalEntropy;
+
+        cout << filename << ","
+            << fixed << setprecision(6) << originalEntropy << ","
+            << fixed << setprecision(6) << mtfEntropy << ","
+            << fixed << setprecision(6) << entropyChange << "\n";
+    }
 }
